@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from rembg import remove, new_session
 from PIL import Image, ImageEnhance, ImageOps
 import io
+import os
+import contextlib
 
 app = FastAPI(title="Motor de Franelas API")
 
@@ -30,17 +32,21 @@ async def procesar_imagen(file: UploadFile = File(...)):
     imagen_original = Image.open(io.BytesIO(contents))
     imagen_original = ImageOps.exif_transpose(imagen_original)
     
+    # Normalizar tamaño máximo a 1500px para estabilizar la matriz de Cholesky y acelerar la IA
+    imagen_original.thumbnail((1500, 1500), Image.Resampling.LANCZOS)
+    
     # 2. Recorte de fondo con suavizado de máscara y Alpha Matting
     print("Recortando fondo...")
-    imagen_sin_fondo = remove(
-        imagen_original, 
-        session=session_ia,
-        post_process_mask=True,
-        alpha_matting=True,
-        alpha_matting_foreground_threshold=240,
-        alpha_matting_background_threshold=10,
-        alpha_matting_erode_size=10
-    )
+    with open(os.devnull, "w") as fnull, contextlib.redirect_stdout(fnull), contextlib.redirect_stderr(fnull):
+        imagen_sin_fondo = remove(
+            imagen_original, 
+            session=session_ia,
+            post_process_mask=True,
+            alpha_matting=True,
+            alpha_matting_foreground_threshold=240,
+            alpha_matting_background_threshold=15,
+            alpha_matting_erode_size=15
+        )
     
     # 3. Auto-recorte de aire transparente (Encuadre exacto al borde del producto)
     print("Ajustando caja delimitadora del producto...")

@@ -151,7 +151,7 @@ export default function App() {
         const formData = new FormData();
         formData.append('file', productFile);
 
-        const res = await fetch('http://127.0.0.1:8000/process', {
+        const res = await fetch('/api/process', {
           method: 'POST',
           body: formData,
         });
