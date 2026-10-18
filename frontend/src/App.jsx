@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import * as fabricModule from 'fabric';
 const fabric = fabricModule.fabric || fabricModule.default?.fabric || fabricModule.default || window.fabric;
 import { AlertTriangle } from 'lucide-react';
@@ -56,6 +56,20 @@ export default function App() {
   const canvasRef = useRef(null);
   const bgFabricObjRef = useRef(null);
   const productFabricObjRef = useRef(null);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      // Si el entorno está virgen (sin producto, fondo, ni textos escritos), permite salir sin preguntar
+      const isVirginState = !productFile && !bgFile && specs.length === 1 && !specs[0].clave && !specs[0].valor;
+      if (isVirginState) return;
+
+      e.preventDefault();
+      e.returnValue = ''; // Requisito técnico estricto de Chrome/Edge para activar su modal nativo
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [productFile, bgFile, specs]);
 
   const handleCanvasReady = useCallback((instance) => {
     canvasRef.current = instance;
