@@ -1,8 +1,8 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from rembg import remove, new_session
-from PIL import Image, ImageEnhance, ImageOps
+from PIL import Image, ImageEnhance, ImageOps, ImageFilter, UnidentifiedImageError
 import io
 import os
 import contextlib
@@ -27,52 +27,75 @@ print("Modelo cargado. Servidor listo para recibir fotos.")
 async def procesar_imagen(file: UploadFile = File(...)):
     print(f"Recibiendo foto: {file.filename}")
     
-    # 1. Leer la imagen que envía el frontend y corregir rotación de celular (EXIF)
-    contents = await file.read()
-    imagen_original = Image.open(io.BytesIO(contents))
-    imagen_original = ImageOps.exif_transpose(imagen_original)
-    
-    # Normalizar tamaño máximo a 1500px para estabilizar la matriz de Cholesky y acelerar la IA
-    imagen_original.thumbnail((1500, 1500), Image.Resampling.LANCZOS)
-    
-    # 2. Recorte de fondo con suavizado de máscara y Alpha Matting
-    print("Recortando fondo...")
-    with open(os.devnull, "w") as fnull, contextlib.redirect_stdout(fnull), contextlib.redirect_stderr(fnull):
-        imagen_sin_fondo = remove(
-            imagen_original, 
-            session=session_ia,
-            post_process_mask=True,
-            alpha_matting=True,
-            alpha_matting_foreground_threshold=240,
-            alpha_matting_background_threshold=15,
-            alpha_matting_erode_size=15
-        )
-    
-    # 3. Auto-recorte de aire transparente (Encuadre exacto al borde del producto)
-    print("Ajustando caja delimitadora del producto...")
-    caja_limite = imagen_sin_fondo.getbbox()
-    if caja_limite:
-        imagen_sin_fondo = imagen_sin_fondo.crop(caja_limite)
+    try:
+        # 1. BLINDAJE LECTURA: Asegurar que es una imagen válida y corregir orientación
+        contents = await file.read()
+        try:
+            imagen_original = Image.open(io.BytesIO(contents))
+        except UnidentifiedImageError:
+            raise HTTPException(status_code=400, detail="El archivo subido no es una imagen válida o está corrupto.")
 
-    # 4. Procesamiento de color y textura (Calibración de estudio)
-    print("Aplicando realce de color y nitidez Premium...")
-    
-    # Saturación al 12% para dar vida sin quemar tonos intensos
-    realzador_color = ImageEnhance.Color(imagen_sin_fondo)
-    imagen_mejorada = realzador_color.enhance(1.12)
-    
-    # Contraste al 8% para dar volumen manteniendo detalle en prendas oscuras
-    realzador_contraste = ImageEnhance.Contrast(imagen_mejorada)
-    imagen_mejorada = realzador_contraste.enhance(1.08)
+        imagen_original = ImageOps.exif_transpose(imagen_original)
+        
+        # BLINDAJE COLOR: Forzar a RGBA para evitar fallos si el cliente sube fotos CMYK o indexadas
+        imagen_original = imagen_original.convert("RGBA")
+        
+        # Normalizar tamaño máximo a 1500px (Protección de memoria y estabilidad matricial)
+        imagen_original.thumbnail((1500, 1500), Image.Resampling.LANCZOS)
+        
+        # 2. IA RECORTE: Alpha Matting calibrado para e-commerce
+        print("Recortando fondo...")
+        with open(os.devnull, "w") as fnull, contextlib.redirect_stdout(fnull), contextlib.redirect_stderr(fnull):
+            imagen_sin_fondo = remove(
+                imagen_original, 
+                session=session_ia,
+                post_process_mask=True,
+                alpha_matting=True,
+                alpha_matting_foreground_threshold=240,
+                alpha_matting_background_threshold=10, # Bajado a 10 para no comerse las sombras suaves
+                alpha_matting_erode_size=10 # Bajado a 10 para no decapitar cuellos de franelas ni hilos
+            )
+        
+        # 3. ENCUADRE: Auto-recorte del aire transparente
+        print("Ajustando caja delimitadora del producto...")
+        caja_limite = imagen_sin_fondo.getbbox()
+        if caja_limite:
+            imagen_sin_fondo = imagen_sin_fondo.crop(caja_limite)
 
-    # Nitidez nativa al 30% para destacar la textura sin crear halos en los bordes
-    realzador_nitidez = ImageEnhance.Sharpness(imagen_mejorada)
-    imagen_final_pil = realzador_nitidez.enhance(1.3)
-    
-    # 5. Convertir la imagen a bytes para enviarla por internet
-    img_byte_arr = io.BytesIO()
-    imagen_final_pil.save(img_byte_arr, format='PNG')
-    img_byte_arr = img_byte_arr.getvalue()
-    
-    print("Devolviendo imagen procesada al cliente.")
-    return Response(content=img_byte_arr, media_type="image/png")
+        # 4. PDI AVANZADO: Aislar el canal Alpha para proteger el borde
+        print("Aplicando PDI: Aislamiento de canales y realce...")
+        
+        # Separar Rojo, Verde, Azul y Transparencia (Alpha)
+        r, g, b, a = imagen_sin_fondo.split()
+        imagen_rgb = Image.merge('RGB', (r, g, b))
+        
+        # 4.1 Realce de Color (Solo afecta la tela, no el borde)
+        realzador_color = ImageEnhance.Color(imagen_rgb)
+        imagen_rgb = realzador_color.enhance(1.12)
+        
+        # 4.2 Contraste (Volumen)
+        realzador_contraste = ImageEnhance.Contrast(imagen_rgb)
+        imagen_rgb = realzador_contraste.enhance(1.08)
+
+        # 4.3 Máscara de Enfoque (Unsharp Masking - Técnica Fotográfica Profesional)
+        # Esto es infinitamente superior a ImageEnhance.Sharpness. Detecta bordes por umbral y 
+        # aumenta el microcontraste sin inyectar ruido ("grano") en la ropa plana.
+        imagen_rgb = imagen_rgb.filter(ImageFilter.UnsharpMask(radius=2, percent=125, threshold=3))
+        
+        # 4.4 Reensamblar: Juntar la foto mejorada con la máscara de recorte original e intacta
+        imagen_final_pil = Image.merge('RGBA', imagen_rgb.split() + (a,))
+        
+        # 5. CODIFICACIÓN Y RESPUESTA
+        img_byte_arr = io.BytesIO()
+        imagen_final_pil.save(img_byte_arr, format='PNG', optimize=True)
+        img_byte_arr = img_byte_arr.getvalue()
+        
+        print("Devolviendo imagen procesada al cliente.")
+        return Response(content=img_byte_arr, media_type="image/png")
+
+    except HTTPException:
+        raise # Deja pasar los errores controlados (ej: foto inválida)
+    except Exception as e:
+        # Blindaje final: Si algo colapsa (ej. memoria llena), no crashea el servidor
+        print(f"Error crítico procesando imagen: {e}")
+        raise HTTPException(status_code=500, detail="Error interno en el servidor de IA al procesar la imagen.")
