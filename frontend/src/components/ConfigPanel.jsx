@@ -1,4 +1,4 @@
-import { ImagePlus, ListPlus, Shirt, Plus, Trash2, Wand2, RefreshCw } from 'lucide-react';
+import { ImagePlus, Shirt, Plus, Trash2, Wand2, RefreshCw, AlignLeft, AlignRight, ListPlus } from 'lucide-react';
 
 export default function ConfigPanel({
   bgPreview,
@@ -92,20 +92,31 @@ export default function ConfigPanel({
           ) : (
           specs.map((item) => (
             <div className="spec-row" key={item.id}>
-              <select
-                className="neu-select"
-                value={item.posicion}
-                onChange={(e) => onUpdateSpec(item.id, 'posicion', e.target.value)}
-                aria-label="Posición de la especificación"
-              >
-                <option value="izquierda">Izq ←</option>
-                <option value="derecha">Der →</option>
-              </select>
+              
+              {/* Toggle Elegante de Posición (Estilo Figma/SaaS) */}
+              <div className="pos-toggle">
+                <button
+                  type="button"
+                  className={`pos-btn ${item.posicion === 'izquierda' ? 'active' : ''}`}
+                  onClick={() => onUpdateSpec(item.id, 'posicion', 'izquierda')}
+                  title="Alinear a la izquierda"
+                >
+                  <AlignLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  className={`pos-btn ${item.posicion === 'derecha' ? 'active' : ''}`}
+                  onClick={() => onUpdateSpec(item.id, 'posicion', 'derecha')}
+                  title="Alinear a la derecha"
+                >
+                  <AlignRight size={16} />
+                </button>
+              </div>
 
               <input
                 type="text"
                 className="neu-input"
-                placeholder="CLAVE (Ej: TELA)"
+                placeholder="PROPIEDAD"
                 value={item.clave}
                 onChange={(e) => onUpdateSpec(item.id, 'clave', e.target.value)}
               />
@@ -113,7 +124,7 @@ export default function ConfigPanel({
               <input
                 type="text"
                 className="neu-input spec-input-valor"
-                placeholder="Valor (Ej: Algodón)"
+                placeholder="DETALLE"
                 value={item.valor}
                 onChange={(e) => onUpdateSpec(item.id, 'valor', e.target.value)}
               />

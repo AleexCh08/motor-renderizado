@@ -384,7 +384,7 @@ ESPECIFICACIONES: MOBILE-FIRST BLINDADO
 
 .spec-row {
   display: grid;
-  grid-template-columns: 92px 1fr 1fr 44px;
+  grid-template-columns: 84px 1fr 1fr 38px;
   gap: 8px;
   align-items: center;
   transition: transform var(--transition-fast);
@@ -392,19 +392,82 @@ ESPECIFICACIONES: MOBILE-FIRST BLINDADO
 
 @media (max-width: 480px) {
   .spec-row {
-    grid-template-columns: 85px 1fr 44px;
+    grid-template-columns: 84px 1fr 38px; 
     grid-template-rows: auto auto;
-    padding: 12px;
-    background-color: var(--bg-input);
+    gap: 8px;
+    padding: 10px;
+    background-color: rgba(10, 17, 36, 0.5);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
   }
 
   .spec-row > *:nth-child(1) { grid-column: 1 / 2; grid-row: 1; }
   .spec-row > *:nth-child(2) { grid-column: 2 / 3; grid-row: 1; }
   .spec-row > *:nth-child(4) { grid-column: 3 / 4; grid-row: 1; }
-  .spec-row > *:nth-child(3) { grid-column: 1 / 4; grid-row: 2; margin-top: 4px; }
+  
+  .spec-row > *:nth-child(3) { 
+    grid-column: 1 / 4; 
+    grid-row: 2; 
+    margin-top: 2px;
+  }
+}
+
+.pos-toggle {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+  height: 40px; 
+}
+
+.pos-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: calc(var(--radius-sm) - 2px);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pos-btn:hover {
+  color: var(--color-accent);
+  background-color: rgba(0, 217, 255, 0.05);
+}
+
+.pos-btn.active {
+  background-color: var(--color-primary);
+  color: var(--text-inverse);
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.4);
+}
+
+/* Inputs Técnicos (Oscuros, bordes nítidos) */
+.neu-input, .neu-select {
+  width: 100%;
+  padding: 10px 12px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(221, 247, 255, 0.1);
+  background-color: var(--bg-input);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--text-main);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+/* Hacemos los placeholders más pequeños, elegantes y sutiles */
+.neu-input::placeholder { 
+  color: rgba(221, 247, 255, 0.25); 
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
 }
 
 .neu-input, .neu-select {
