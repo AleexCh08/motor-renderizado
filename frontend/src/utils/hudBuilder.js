@@ -43,15 +43,29 @@ export function applyBackgroundCover(canvas, bgImageObj, targetWidth, targetHeig
 /**
  * Motor de Renderizado High-Tech (Estilo Referencia)
  */
-export function renderHudSpecifications(canvas, specsList, productObj, config) {
-  // 1. Limpiar HUD anterior
+export function renderHudSpecifications(canvas, specsList, productObj, config, forceRelayout = false) {
+  // 1. Limpiar HUD anterior guardando sus posiciones exactas en memoria
   const existingSpecs = canvas.getObjects().filter((obj) => obj.customType === 'hud-spec' || obj.customType === 'hud-ring');
-  existingSpecs.forEach((obj) => canvas.remove(obj));
+  
+  const savedPositions = {};
+  existingSpecs.forEach((obj) => {
+    // Si no presionamos el botón de reordenar, guardamos la posición donde el cliente lo dejó
+    if (!forceRelayout && obj.customType === 'hud-spec' && obj.specId) {
+      savedPositions[obj.specId] = {
+        left: obj.left,
+        top: obj.top,
+        angle: obj.angle,
+        scaleX: obj.scaleX,
+        scaleY: obj.scaleY
+      };
+    }
+    canvas.remove(obj); // Destruye el objeto viejo
+  });
 
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
 
-  // 2. Dibujar anillos de radar decorativos
+  // 2. Dibujar anillos de radar decorativos (Estos no se mueven manualmente, siempre van al centro)
   if (productObj) {
     const prodCenter = productObj.getCenterPoint();
     const ringRadius = (productObj.height * productObj.scaleY) * 0.52;
@@ -99,7 +113,6 @@ export function renderHudSpecifications(canvas, specsList, productObj, config) {
 
   const baseRef = Math.min(canvas.width, canvas.height);
   
-  // CORRECCIÓN DE TAMAÑO: Aumentamos la base matemática y la multiplicamos por el slider del usuario
   const sizeClave = Math.max(22, Math.floor(baseRef * 0.028 * config.fontScale));
   const sizeValor = Math.max(18, Math.floor(baseRef * 0.020 * config.fontScale));
   
@@ -123,7 +136,7 @@ export function renderHudSpecifications(canvas, specsList, productObj, config) {
       const lineY = isTopHalf ? angleHeight : 0;
       const circleY = isTopHalf ? 0 : angleHeight;
 
-      // Título Principal (Color clave y fuente elegida)
+      // Textos
       const textoClave = new fabric.Text(spec.clave.trim().toUpperCase(), {
         fontSize: sizeClave,
         fill: config.colorKey,
@@ -136,12 +149,11 @@ export function renderHudSpecifications(canvas, specsList, productObj, config) {
         shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.9)', blur: 6, offsetX: 1, offsetY: 1 }),
       });
 
-      // Valor Secundario (Color Main y fuente elegida)
       const textoValor = new fabric.Text(spec.valor.trim().toUpperCase(), {
         fontSize: sizeValor,
         fill: config.colorMain,
         fontFamily: config.fontFamily,
-        fontWeight: config.fontFamily === 'Harman Retro' ? 'normal' : '500', // Harman ya es gruesa por defecto
+        fontWeight: config.fontFamily === 'Harman Retro' ? 'normal' : '500',
         charSpacing: 50,
         originX: esDerecha ? 'left' : 'right',
         originY: 'top',
@@ -150,16 +162,15 @@ export function renderHudSpecifications(canvas, specsList, productObj, config) {
         shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.8)', blur: 4, offsetX: 1, offsetY: 1 }),
       });
 
+      // Líneas
       let svgPath = '';
       const circleX = esDerecha ? 0 : lineLen + dropX;
-      
       if (esDerecha) {
         svgPath = `M 0 ${circleY} L ${dropX} ${lineY} L ${dropX + lineLen} ${lineY}`;
       } else {
         svgPath = `M 0 ${lineY} L ${lineLen} ${lineY} L ${circleX} ${circleY}`;
       }
 
-      // Líneas
       const rutaLinea = new fabric.Path(svgPath, {
         fill: '',
         stroke: config.colorMain,
@@ -171,7 +182,7 @@ export function renderHudSpecifications(canvas, specsList, productObj, config) {
         shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.5)', blur: 4 }),
       });
 
-      // Anclajes
+      // Puntos
       const anchorCircle = new fabric.Circle({
         radius: 4,
         fill: '#050B1A',
@@ -193,11 +204,22 @@ export function renderHudSpecifications(canvas, specsList, productObj, config) {
       });
 
       const groupElements = [rutaLinea, anchorCircle, detailCircle, textoClave, textoValor];
-      const absLeft = esDerecha ? centerX + anchorDist : centerX - anchorDist;
+      const defaultLeft = esDerecha ? centerX + anchorDist : centerX - anchorDist;
+
+      // 4. Inyección de memoria: Si el cliente movió este objeto, recuperamos su posición
+      const savedState = savedPositions[spec.id];
+      const finalLeft = savedState ? savedState.left : defaultLeft;
+      const finalTop = savedState ? savedState.top : posY;
+      const finalAngle = savedState ? savedState.angle : 0;
+      const finalScaleX = savedState ? savedState.scaleX : 1;
+      const finalScaleY = savedState ? savedState.scaleY : 1;
 
       const grupoSpec = new fabric.Group(groupElements, {
-        left: absLeft,
-        top: posY,
+        left: finalLeft,
+        top: finalTop,
+        angle: finalAngle,
+        scaleX: finalScaleX,
+        scaleY: finalScaleY,
         originX: esDerecha ? 'left' : 'right',
         originY: 'center',
         borderColor: config.colorMain,
@@ -206,6 +228,7 @@ export function renderHudSpecifications(canvas, specsList, productObj, config) {
         transparentCorners: false,
         cornerSize: 10,
         customType: 'hud-spec',
+        specId: spec.id // CRÍTICO: El carnet de identidad para encontrarlo después
       });
 
       canvas.add(grupoSpec);

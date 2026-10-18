@@ -257,7 +257,7 @@ export default function App() {
 
   const handleRelayoutHud = () => {
     if (!canvasRef.current) return;
-    renderHudSpecifications(canvasRef.current, specs, productFabricObjRef.current, hudConfig);
+    renderHudSpecifications(canvasRef.current, specs, productFabricObjRef.current, hudConfig, true);
   };
 
   // Descarga en alta resolución con el formato elegido en el nombre del archivo
