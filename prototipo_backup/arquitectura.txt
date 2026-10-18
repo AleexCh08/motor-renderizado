@@ -1,0 +1,43 @@
+Frontend en Vercel (Gratis): Alojas la interfaz web (la página donde tu amigo sube la foto, elige el fondo y descarga). 
+Para esto, Vercel es el rey y funcionará perfecto.
+
+Backend en Hugging Face Spaces (Gratis): Aquí está el truco. Hugging Face es una plataforma para desarrolladores de IA. 
+Ellos ofrecen "Spaces" gratuitos para alojar contenedores Docker o aplicaciones Gradio/FastAPI. Te dan 16 GB de RAM y 2 
+vCPU completamente gratis. Alojas tu código de Python (rembg + OpenCV) allí como una API.
+
+
+Opción 2: El Santo Grial gratuito (Oracle Cloud Always Free)
+
+Opción 3: El VPS ultra barato (La opción profesional y sin dolores de cabeza)
+Si el truco de Hugging Face te da problemas de latencia o no logran abrir la cuenta de Oracle, no uses Render de pago 
+(es muy caro para lo que ofrece). Vete por Contabo.
+
+Contabo es un proveedor alemán. Por $5.50 USD al mes, te dan un VPS con 6 GB de RAM y 4 vCPU. Es potencia más que 
+suficiente para tener tu frontend, tu backend de Python, rembg, OpenCV y los fondos alojados en una sola máquina 
+funcionando 24/7 sin caídas. Tu amigo afilia su tarjeta ahí y se olvida del problema.
+
+Frontend: React.js o Next.js. Son rápidos, manejan bien el estado (carga de imagen, visualización de progreso, 
+inputs de texto) y la manipulación del Canvas.
+
+Backend: Python con FastAPI. Es ligero, extremadamente rápido y es el estándar de la industria si luego necesitas 
+hacer manipulación de imágenes a nivel de servidor (usando bibliotecas como Pillow u OpenCV) antes de enviarlas al frontend.
+
+
+MEJORAS:
+Poder cargar foto o tomar foto
+Poder descargar en diferentes aspectos
+Poder descargar en diferentes formatos (png, jpg)
+Poder elegir el fondo (carpeta preestablecida, con varios fondos), o cargar fondo diferente
+Poder elegir fuente, color de texto (color de la clave y el valor de las especificaciones)
+
+-- Estilo de UI -- Neumorfismo? Esqueumorfismo?
+Paleta de colores
+Logo
+Nombre
+
+Buena arquitectura, front separado del back, cada componente en su archivo distinto,
+hoja de estilos aparte,
+
+Errores en main.py 
+No funciona en 192.168.1.6:5173
+

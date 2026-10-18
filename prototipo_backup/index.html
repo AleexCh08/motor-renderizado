@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Post para Franelas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        /* Declaración obligatoria de la fuente personalizada */
+        @font-face {
+            font-family: 'Harman Retro';
+            src: url('harman.otf'); /* Cambia a .otf si tu archivo tiene esa extensión */
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e1e; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .panel { background: #2d2d2d; padding: 20px; border-radius: 10px; width: 100%; max-width: 500px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; box-sizing: border-box; }
+        input { background: #404040; color: white; }
+        button { background: #007bff; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        .canvas-container { 
+            display: none;
+            margin: 0 auto !important; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            width: 100% !important;
+            max-width: 500px !important; /* Mismo ancho del panel: encaja siempre en pantalla sin afectar la resolución de descarga */
+            height: auto !important;
+        }
+        .canvas-container canvas.lower-canvas {
+            position: relative !important; /* CRÍTICO: Evita que el contenedor mida 0px y tape el botón */
+            width: 100% !important;
+            height: auto !important;
+            display: block !important;
+            border-radius: 10px;
+        }
+        .canvas-container canvas.upper-canvas {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 10px;
+        }
+        #estado { color: #ffeb3b; font-weight: bold; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <h2>Editor de Marketing</h2>
+
+    <div class="panel">
+        <label>Fondo premium (Estudio, Pedestal, etc.):</label>
+        <input type="file" id="fondoInput" accept="image/*">
+
+        <label>Foto de la franela:</label>
+        <input type="file" id="fotoInput" accept="image/*">
+        
+        <label>Especificaciones:</label>
+        <div id="contenedorEspecificaciones">
+            <div class="fila-especificacion" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <select class="posicion" style="width: 30%; background: #404040; color: white; border-radius: 5px; border: none; padding: 10px;">
+                    <option value="izquierda">Izquierda</option>
+                    <option value="derecha">Derecha</option>
+                </select>
+                <input type="text" class="clave" placeholder="Ej: TIPO DE TELA" value="TIPO DE TELA">
+                <input type="text" class="valor" placeholder="Ej: Algodón 100%">
+                <button type="button" class="btnEliminar" style="background: #dc3545; width: auto; padding: 0 15px;">X</button>
+            </div>
+        </div>
+        <button id="btnAgregarSpec" style="background: #28a745; margin-bottom: 20px;">+ Agregar Especificación</button>
+        
+        <button id="btnProcesar">Procesar y Generar Render</button>
+        <p id="estado"></p>
+    </div>
+
+    <!-- Aquí se dibujará la composición final -->
+    <div id="contenedorExportacion" style="display: none; width: 100%; flex-direction: column; align-items: center;">
+        <canvas id="miCanvas" width="1080" height="1080"></canvas>
+        <button id="btnDescargar" style="width: 100%; max-width: 500px; background: #28a745; margin-top: 20px;">Descargar para Instagram</button>
+    </div>
+
+    <script>
+        const btnProcesar = document.getElementById('btnProcesar');
+        const fotoInput = document.getElementById('fotoInput');
+        const estado = document.getElementById('estado');
+        const btnDescargar = document.getElementById('btnDescargar');
+        
+        // 1. Inicializar el Canvas Interactivo con Fabric.js
+        const canvas = new fabric.Canvas('miCanvas', {
+            width: 1080,
+            height: 1080,
+            preserveObjectStacking: true // Evita que los objetos salten al frente al seleccionarlos
+        });
+
+        // Funcionalidad de agregar/eliminar inputs (Se mantiene igual)
+        document.getElementById('btnAgregarSpec').addEventListener('click', () => {
+            const contenedor = document.getElementById('contenedorEspecificaciones');
+            const fila = document.createElement('div');
+            fila.className = 'fila-especificacion';
+            fila.style = 'display: flex; gap: 10px; margin-bottom: 10px;';
+            fila.innerHTML = `
+                <select class="posicion" style="width: 30%; background: #404040; color: white; border-radius: 5px; border: none; padding: 10px;">
+                    <option value="izquierda">Izquierda</option>
+                    <option value="derecha">Derecha</option>
+                </select>
+                <input type="text" class="clave" placeholder="NUEVA CLAVE">
+                <input type="text" class="valor" placeholder="Valor de la clave">
+                <button type="button" class="btnEliminar" style="background: #dc3545; width: auto; padding: 0 15px;">X</button>
+            `;
+            contenedor.appendChild(fila);
+            fila.querySelector('.btnEliminar').addEventListener('click', () => fila.remove());
+        });
+
+        document.querySelector('.btnEliminar').addEventListener('click', function() {
+            this.parentElement.remove();
+        });
+
+        // Lógica principal de procesamiento
+        btnProcesar.addEventListener('click', async () => {
+            if (!fotoInput.files[0]) {
+                alert("Por favor, selecciona una foto de la franela.");
+                return;
+            }
+
+            // Obligamos al navegador a cargar la fuente en memoria ANTES de usar Canvas
+            try {
+                await document.fonts.load('16px "Harman Retro"');
+            } catch(e) {
+                console.warn("Fallo al cargar fuente, continuando...");
+            }
+
+            estado.innerText = "1/2 Procesando recorte y Alpha Matting en Python...";
+            btnProcesar.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', fotoInput.files[0]);
+
+            try {
+                // Limpiar el lienzo para un nuevo render
+                canvas.clear();
+
+                const respuesta = await fetch('http://127.0.0.1:8000/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!respuesta.ok) throw new Error("Error en el servidor Python");
+
+                const blobImagen = await respuesta.blob();
+                const urlImagen = URL.createObjectURL(blobImagen);
+                
+                estado.innerText = "2/2 Construyendo entorno interactivo...";
+
+                // A. CONFIGURAR EL FONDO FOTOGRÁFICO
+                const archivoFondo = document.getElementById('fondoInput').files[0];
+                if (archivoFondo) {
+                    const urlFondo = URL.createObjectURL(archivoFondo);
+                    fabric.Image.fromURL(urlFondo, function(imgFondo) {
+                        // Ajustar el canvas al tamaño del fondo
+                        canvas.setWidth(imgFondo.width);
+                        canvas.setHeight(imgFondo.height);
+                        canvas.setBackgroundImage(imgFondo, canvas.renderAll.bind(canvas));
+                        cargarElementos(urlImagen); // Llamar a cargar la franela
+                    });
+                } else {
+                    canvas.setWidth(1080);
+                    canvas.setHeight(1080);
+                    canvas.setBackgroundColor('#111316', canvas.renderAll.bind(canvas));
+                    cargarElementos(urlImagen);
+                }
+
+                // Función interna para cargar franela y textos una vez el fondo esté listo
+                function cargarElementos(urlProducto) {
+                    // B. CARGAR FRANELA COMO OBJETO INTERACTIVO
+                    fabric.Image.fromURL(urlProducto, function(imgFranela) {
+                        // Escalar al 70% del alto por defecto
+                        imgFranela.scaleToHeight(canvas.height * 0.70);
+                        
+                        // Añadir sombra dinámica (reacciona si la rotas)
+                        imgFranela.set({
+                            shadow: new fabric.Shadow({
+                                color: 'rgba(0,0,0,0.6)',
+                                blur: 25,
+                                offsetX: 0,
+                                offsetY: 15
+                            })
+                        });
+
+                        canvas.add(imgFranela);
+                        canvas.centerObject(imgFranela); // Centrar por defecto
+                    });
+
+                    // C. CARGAR ESPECIFICACIONES COMO GRUPOS INTERACTIVOS (HUD Style)
+                    const filas = document.querySelectorAll('.fila-especificacion');
+                    const specsIzq = [];
+                    const specsDer = [];
+
+                    // 1. Separar los datos elegidos por el usuario
+                    filas.forEach((fila) => {
+                        const clave = fila.querySelector('.clave').value.trim();
+                        const valor = fila.querySelector('.valor').value.trim();
+                        
+                        // Si falta el <select> en el HTML, no colapsa, asume 'izquierda' por defecto
+                        const selectorPos = fila.querySelector('.posicion');
+                        const pos = selectorPos ? selectorPos.value : 'izquierda'; 
+                        
+                        if(clave && valor) {
+                            if(pos === 'izquierda') specsIzq.push({clave, valor});
+                            else specsDer.push({clave, valor});
+                        }
+                    });
+
+                    // 2. Definir espacio vertical útil (Del 25% al 75% del alto de la imagen)
+                    const startY = canvas.height * 0.25;
+                    const availableHeight = canvas.height * 0.50;
+
+                    // 3. Función generadora de bloques
+                    const procesarColumna = (specsArray, esDerecha) => {
+                        const espaciado = specsArray.length > 1 ? availableHeight / (specsArray.length - 1) : 0;
+                        
+                        specsArray.forEach((spec, index) => {
+                            const posY = startY + (index * espaciado) + (specsArray.length === 1 ? availableHeight / 2 : 0);
+                            
+                            const sizeClave = Math.floor(canvas.width * 0.022);
+                            const sizeValor = Math.floor(canvas.width * 0.016);
+                            const anchoLinea = canvas.width * 0.15;
+                            const caidaY = canvas.height * 0.03;
+
+                            // Textos y alineaciones condicionales (Espejo para la derecha)
+                            const textoClave = new fabric.Text(spec.clave, {
+                                fontSize: sizeClave, fill: '#ffffff', fontWeight: 'bold',
+                                originX: esDerecha ? 'right' : 'left', originY: 'top',
+                                top: 0, left: esDerecha ? anchoLinea + 30 : 0, 
+                                textAlign: esDerecha ? 'right' : 'left',
+                                shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.9)', blur: 5, offsetX: 2, offsetY: 2 })
+                            });
+
+                            const textoValor = new fabric.Text(spec.valor, {
+                                fontSize: sizeValor, fill: '#7dd3fc', fontFamily: 'Harman Retro',
+                                originX: esDerecha ? 'right' : 'left', originY: 'top',
+                                top: textoClave.height + 5, left: esDerecha ? anchoLinea + 30 : 0,
+                                textAlign: esDerecha ? 'right' : 'left',
+                                shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.9)', blur: 5, offsetX: 2, offsetY: 2 })
+                            });
+
+                            const inicioLineaY = textoValor.top + textoValor.height + 12;
+                            let SVGPath = "";
+
+                            if(esDerecha) {
+                                // Dibuja de derecha a izquierda, y quiebra hacia abajo a la izquierda
+                                SVGPath = `M ${anchoLinea + 30} ${inicioLineaY} L 30 ${inicioLineaY} L 0 ${inicioLineaY + caidaY}`;
+                            } else {
+                                // Dibuja de izquierda a derecha, y quiebra hacia abajo a la derecha
+                                SVGPath = `M 0 ${inicioLineaY} L ${anchoLinea} ${inicioLineaY} L ${anchoLinea + 30} ${inicioLineaY + caidaY}`;
+                            }
+
+                            const rutaLinea = new fabric.Path(SVGPath, {
+                                fill: '', stroke: 'rgba(125, 211, 252, 0.9)', 
+                                strokeWidth: Math.max(2, Math.floor(canvas.width * 0.002)),
+                                originX: 'left', originY: 'top', left: 0, top: 0,
+                                shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.6)', blur: 4, offsetX: 1, offsetY: 1 })
+                            });
+
+                            const grupoSpec = new fabric.Group([rutaLinea, textoClave, textoValor], {
+                                left: esDerecha ? canvas.width * 0.92 : canvas.width * 0.08,
+                                top: posY,
+                                originX: esDerecha ? 'right' : 'left',
+                                originY: 'center', // Centrado vertical para alineación matemática perfecta
+                                borderColor: '#7dd3fc', cornerColor: '#7dd3fc', transparentCorners: false
+                            });
+
+                            canvas.add(grupoSpec);
+                        });
+                    };
+
+                    // Ejecutar dibujo de columnas bajo protección (SOLO UNA VEZ)
+                    try {
+                        procesarColumna(specsIzq, false);
+                        procesarColumna(specsDer, true);
+                    } catch (error) {
+                        console.error("Fallo interno en los textos:", error);
+                        alert("El producto cargó, pero hubo un error dibujando las especificaciones. Revisa la consola.");
+                    }
+
+                    // Reparación del flujo visual y aparición del botón (Después de dibujar todo)
+                    document.querySelector('.canvas-container').style.display = 'block';
+                    document.getElementById('contenedorExportacion').style.display = 'flex';
+                    
+                    estado.innerText = "¡Arte listo! Haz clic en los elementos para moverlos o rotarlos.";
+                    btnProcesar.disabled = false;
+                }
+
+            } catch (error) {
+                console.error(error);
+                estado.innerText = "Hubo un error de conexión con el motor IA.";
+                btnProcesar.disabled = false;
+            }
+        });
+
+        // Descarga segura del Canvas (Ignorando las cajas de selección si hay algo seleccionado)
+        btnDescargar.addEventListener('click', () => {
+            canvas.discardActiveObject(); // Deseleccionar para que no salga el recuadro azul en la foto
+            canvas.renderAll();
+            
+            const enlace = document.createElement('a');
+            enlace.download = 'post_premium_ig.jpg';
+            // Exportar con máxima calidad
+            enlace.href = canvas.toDataURL({ format: 'jpeg', quality: 0.95, multiplier: 1 });
+            enlace.click();
+        });
+    </script>
+</body>
+</html>
