@@ -525,6 +525,9 @@ ESPECIFICACIONES: MOBILE-FIRST BLINDADO
 .neu-input, .neu-select {
   width: 100%;
   padding: 12px 14px;
+  height: auto; 
+  text-overflow: ellipsis; 
+  white-space: nowrap; 
   border-radius: var(--radius-sm);
   border: 1px solid rgba(0, 217, 255, 0.15);
   background-color: rgba(5, 11, 26, 0.8);
