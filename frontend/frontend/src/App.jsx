@@ -142,7 +142,7 @@ export default function App() {
       }
 
       // 3. Dibujar especificaciones HUD alrededor
-      renderHudSpecifications(canvas, currentSpecs);
+      renderHudSpecifications(canvas, currentSpecs, prodObj);
       canvas.renderAll();
     },
     []
