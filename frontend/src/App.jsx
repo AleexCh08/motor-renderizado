@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import * as fabricModule from 'fabric';
 const fabric = fabricModule.fabric || fabricModule.default?.fabric || fabricModule.default || window.fabric;
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react';
 import TopNavPill from './components/TopNavPill';
 import ConfigPanel from './components/ConfigPanel';
 import WorkspaceCanvas from './components/WorkspaceCanvas';
@@ -11,6 +11,7 @@ import {
   applyBackgroundCover,
   renderHudSpecifications,
 } from './utils/hudBuilder';
+import NotFound from './components/NotFound';
 
 // Generador de especificación vacía para iniciar limpio y para el reseteo
 const getEmptySpec = () => ({
@@ -51,6 +52,14 @@ export default function App() {
     colorMain: '#00D9FF', // Líneas y Valor
     colorKey: '#FFFFFF',  // Clave
   });
+
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500); // Se oculta solo en 3.5s
+  }, []);
 
   // Referencias a objetos de Fabric.js en memoria
   const canvasRef = useRef(null);
@@ -186,7 +195,7 @@ export default function App() {
     try {
       // Si el producto cambió, llamamos a FastAPI
       if (needsAiCall || !productFabricObjRef.current) {
-        setStatusMsg('Recortando fondo ...');
+        setStatusMsg('Renderizando producto ...');
         const formData = new FormData();
         formData.append('file', productFile);
 
@@ -195,7 +204,9 @@ export default function App() {
           body: formData,
         });
 
-        if (!res.ok) throw new Error('Error en el servidor Python');
+        if (!res.ok) {
+          throw new Error(`Error del servidor: ${res.status}`);
+        }
 
         const blob = await res.blob();
         const processedUrl = URL.createObjectURL(blob);
@@ -223,13 +234,14 @@ export default function App() {
         hudConfig
       );
 
+      setStatusMsg(null);
       setHasRender(true);
       setActiveView('studio'); // Desliza horizontalmente hacia la vista del Estudio
-      setStatusMsg('');
-    } catch (err) {
-      console.error(err);
-      setStatusMsg('Error: Verifica que FastAPI esté activo en el puerto 8000');
-      setTimeout(() => setStatusMsg(''), 4000);
+      showToast('Renderizado completado con éxito', 'success');
+    } catch (error) {
+      console.error(error);
+      setStatusMsg(null); // Quita el bloqueo de pantalla
+      showToast('Error de conexión o fallo al procesar la imagen.', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -301,6 +313,7 @@ export default function App() {
       multiplier: 1,
     });
     link.click();
+    showToast('Imagen descargada correctamente', 'success');
   };
 
   // Abre el modal en lugar del alert del navegador
@@ -326,10 +339,29 @@ export default function App() {
     setNeedsAiCall(true);
     setActiveView('panel');
     setIsResetModalOpen(false);
+    showToast('Proyecto reiniciado correctamente', 'success');
   };
+
+  // Interceptor Nativo 404
+  if (currentPath !== '/' && currentPath !== '/index.html') {
+    return <NotFound onReturn={() => {
+      window.history.pushState({}, '', '/');
+      setCurrentPath('/');
+    }} />;
+  }
 
   return (
     <div className="app-shell">
+      {/* Sistema de Notificaciones Toasts */}
+      {toast && (
+        <div className="toast-container">
+          <div className={`neu-toast ${toast.type}`}>
+            {toast.type === 'success' ? <CheckCircle2 size={18} color="#34C759" /> : <AlertCircle size={18} color="#FF453A" />}
+            <span>{toast.msg}</span>
+          </div>
+        </div>
+      )}
+
       {/* Píldora superior de navegación */}
       <TopNavPill
         activeView={activeView}
