@@ -20,6 +20,24 @@ export default function WorkspaceCanvas({ onCanvasReady, logicalSize, hasRender 
       selectionColor: 'rgba(0, 217, 255, 0.15)',
       selectionBorderColor: '#00D9FF',
       selectionLineWidth: 1.5,
+      allowTouchScrolling: true, 
+    });
+
+    instance.on('touch:gesture', (e) => {
+      if (e.e.touches && e.e.touches.length === 2) {
+        const target = instance.getActiveObject();
+        
+        if (target && target.type === 'image') {
+          const scaleDiff = (e.self.scale - 1) * 0.1; 
+          let newScale = target.scaleX + scaleDiff;
+        
+          if (newScale > 0.2 && newScale < 3) {
+            target.scale(newScale);
+            target.setCoords(); 
+            instance.renderAll();
+          }
+        }
+      }
     });
 
     fabricRef.current = instance;
