@@ -226,9 +226,14 @@ export function renderHudSpecifications(canvas, specsList, productObj, config, f
         cornerColor: '#050B1A',
         cornerStrokeColor: config.colorMain,
         transparentCorners: false,
-        cornerSize: 10,
+        cornerSize: 16,
+        touchCornerSize: 44,      
+        cornerStyle: 'circle',    
+        padding: 12,              
+        rotatingPointOffset: 40,  
+        borderDashArray: [4, 4],  
         customType: 'hud-spec',
-        specId: spec.id // CRÍTICO: El carnet de identidad para encontrarlo después
+        specId: spec.id 
       });
 
       canvas.add(grupoSpec);

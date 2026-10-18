@@ -132,11 +132,16 @@ export default function App() {
         prodObj.scaleToHeight(dims.height * 0.68);
         prodObj.set({
           angle: 0,
-          borderColor: '#7dd3fc',
-          cornerColor: '#27187E',
-          cornerStrokeColor: '#ffffff',
+          borderColor: currentHudConfig ? currentHudConfig.colorMain : '#00D9FF',
+          cornerColor: '#050B1A',
+          cornerStrokeColor: currentHudConfig ? currentHudConfig.colorMain : '#00D9FF',
           transparentCorners: false,
-          cornerSize: 12,
+          cornerSize: 18,           // Tamaño visual agradable del círculo
+          touchCornerSize: 48,      // CRÍTICO EN MÓVIL: Área táctil invisible gigante para los pulgares
+          cornerStyle: 'circle',    // Estilo moderno circular
+          padding: 16,              // Separa la caja delimitadora de la prenda para no taparla
+          rotatingPointOffset: 50,  // Aleja la varilla de rotación para que el dedo no tape la imagen
+          borderDashArray: [6, 6],  // Borde punteado tecnológico
           shadow: new fabric.Shadow({
             color: 'rgba(0,0,0,0.62)',
             blur: Math.floor(Math.min(dims.width, dims.height) * 0.025),
