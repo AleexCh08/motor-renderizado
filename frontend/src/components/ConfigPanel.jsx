@@ -33,9 +33,15 @@ export default function ConfigPanel({
         <label className="upload-zone">
           <input
             type="file"
-            accept="image/*"
-             hidden
-            onChange={(e) => e.target.files[0] && onSelectBg(e.target.files[0])}
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+            hidden
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file && file.type.startsWith('image/')) {
+                onSelectBg(file);
+              }
+              e.target.value = ''; 
+            }}
           />
           <div className="upload-thumb">
             {bgPreview ? <img src={bgPreview} alt="Miniatura fondo" /> : <ImagePlus size={22} />}
@@ -52,9 +58,15 @@ export default function ConfigPanel({
         <label className="upload-zone">
           <input
             type="file"
-            accept="image/*"
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
             hidden
-            onChange={(e) => e.target.files[0] && onSelectProduct(e.target.files[0])}
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file && file.type.startsWith('image/')) {
+                onSelectProduct(file);
+              }
+              e.target.value = ''; 
+            }}
           />
           <div className="upload-thumb">
             {productPreview ? (
