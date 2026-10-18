@@ -74,15 +74,53 @@ html, body, #root {
   width: 100%;
   height: 100dvh;
   position: relative;
-  background-image: linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
-  animation: gridFlow 40s linear infinite;
+  background-color: var(--bg-body); 
+  overflow: hidden;
 }
 
-@keyframes gridFlow {
-  0% { background-position: 0 0; }
-  100% { background-position: -32px -32px; }
+.app-shell::before,
+.app-shell::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; 
+  pointer-events: none; 
+}
+
+.app-shell::before {
+  background: radial-gradient(circle at 80% -20%, rgba(0, 102, 255, 0.25) 0%, transparent 60%);
+  animation: wavePulse 8s infinite alternate ease-in-out;
+}
+
+.app-shell::after {
+  background: radial-gradient(circle at -10% 110%, rgba(29, 43, 83, 0.4) 0%, transparent 50%);
+  animation: wavePulse 12s infinite alternate-reverse ease-in-out;
+}
+
+.bg-grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; 
+  pointer-events: none;
+  background-image: 
+    linear-gradient(rgba(221, 247, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(221, 247, 255, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+@keyframes wavePulse {
+  0% { opacity: 0.4; transform: scale(1); }
+  100% { opacity: 0.8; transform: scale(1.1); }
+}
+
+.top-header, .viewport-slider, .fab-dock-wrapper {
+  z-index: 10;
 }
 
 /* ==========================================================================

@@ -352,6 +352,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <div className="bg-grid-overlay"></div>
       {/* Sistema de Notificaciones Toasts */}
       {toast && (
         <div className="toast-container">
