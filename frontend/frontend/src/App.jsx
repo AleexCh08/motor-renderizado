@@ -93,7 +93,7 @@ export default function App() {
 
   // Función que ensambla o actualiza el lienzo según proporción, fondo, producto y HUD
   const composeScene = useCallback(
-    async (ratioId, prodObj, bgObj, currentSpecs) => {
+    async (ratioId, prodObj, bgObj, currentSpecs, currentBgColor) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
@@ -113,9 +113,9 @@ export default function App() {
 
       // 1. Aplicar fondo en modo Cover
       applyBackgroundCover(canvas, bgObj, dims.width, dims.height);
-    if (!bgObj) {
-      canvas.setBackgroundColor(bgColor, canvas.renderAll.bind(canvas));
-    }
+      if (!bgObj) {
+        canvas.setBackgroundColor(currentBgColor, canvas.renderAll.bind(canvas));
+      }
 
       // 2. Posicionar el producto centrado y escalado al 68% de la altura
       if (prodObj) {
@@ -189,7 +189,8 @@ export default function App() {
         selectedRatio,
         productFabricObjRef.current,
         bgFabricObjRef.current,
-        specs
+        specs,
+        bgColor
       );
 
       setHasRender(true);
@@ -211,7 +212,8 @@ export default function App() {
       newRatioId,
       productFabricObjRef.current,
       bgFabricObjRef.current,
-      specs
+      specs,
+      bgColor
     );
   };
 
