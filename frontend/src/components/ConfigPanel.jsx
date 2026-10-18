@@ -15,6 +15,8 @@ export default function ConfigPanel({
   isProcessing,
   needsAiCall,
   hasRender,
+  hudConfig,
+  onUpdateHudConfig,
 }) {
   return (
     <div className="panel-grid">
@@ -79,7 +81,6 @@ export default function ConfigPanel({
             </h2>
             <button type="button" className="neu-btn" onClick={onAddSpec} style={{ padding: '8px 12px', fontSize: '0.78rem' }}>
                 <Plus size={18} />
-                
             </button>
         </div>
 

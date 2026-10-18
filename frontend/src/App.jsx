@@ -45,6 +45,13 @@ export default function App() {
   const [logicalSize, setLogicalSize] = useState({ width: 1080, height: 1080 });
   const [bgColor, setBgColor] = useState('#14112E');
 
+  const [hudConfig, setHudConfig] = useState({
+    fontScale: 1.0,
+    fontFamily: 'Plus Jakarta Sans',
+    colorMain: '#00D9FF', // Líneas y Valor
+    colorKey: '#FFFFFF',  // Clave
+  });
+
   // Referencias a objetos de Fabric.js en memoria
   const canvasRef = useRef(null);
   const bgFabricObjRef = useRef(null);
@@ -142,7 +149,7 @@ export default function App() {
       }
 
       // 3. Dibujar especificaciones HUD alrededor
-      renderHudSpecifications(canvas, currentSpecs, prodObj);
+      renderHudSpecifications(canvas, currentSpecs, prodObj, hudConfig);
       canvas.renderAll();
     },
     []
@@ -226,6 +233,16 @@ export default function App() {
     }
   };
 
+  // Actualizar configuración del HUD en VIVO (sin reiniciar ni tocar FastAPI)
+  const handleUpdateHudConfig = (field, value) => {
+    const newConfig = { ...hudConfig, [field]: value };
+    setHudConfig(newConfig);
+    
+    if (canvasRef.current) {
+      renderHudSpecifications(canvasRef.current, specs, productFabricObjRef.current, newConfig);
+    }
+  };
+
   // Acciones rápidas del FAB
   const handleCenterProduct = () => {
     const canvas = canvasRef.current;
@@ -240,7 +257,7 @@ export default function App() {
 
   const handleRelayoutHud = () => {
     if (!canvasRef.current) return;
-    renderHudSpecifications(canvasRef.current, specs);
+    renderHudSpecifications(canvasRef.current, specs, productFabricObjRef.current, hudConfig);
   };
 
   // Descarga en alta resolución con el formato elegido en el nombre del archivo
@@ -347,6 +364,8 @@ export default function App() {
         hasBgImage={bgFile !== null}
         bgColor={bgColor}
         onChangeBgColor={handleChangeBgColor}
+        hudConfig={hudConfig}
+        onUpdateHudConfig={handleUpdateHudConfig}
       />
 
       {/* MODAL PERSONALIZADO DE REINICIO */}

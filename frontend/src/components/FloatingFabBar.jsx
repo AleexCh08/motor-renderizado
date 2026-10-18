@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, Focus, LayoutGrid, Crop, Palette } from 'lucide-react';
+import { Download, Focus, LayoutGrid, Crop, Palette, Sliders } from 'lucide-react';
 import { ASPECT_RATIOS } from '../utils/hudBuilder';
 
 export default function FloatingFabBar({
@@ -11,25 +11,27 @@ export default function FloatingFabBar({
   onDownload,
   disabled,
   hasBgImage,
-  bgColor, 
+  bgColor,
   onChangeBgColor,
+  hudConfig,
+  onUpdateHudConfig,
 }) {
   const [ratioMenuOpen, setRatioMenuOpen] = useState(false);
+  const [configMenuOpen, setConfigMenuOpen] = useState(false);
 
   if (!visible) return null;
 
-  // Busca el texto del formato actual para mostrarlo en el botón
-  const currentRatioLabel = ASPECT_RATIOS.find(r => r.id === selectedRatio)?.label || '1:1';
+  const currentRatioLabel = ASPECT_RATIOS.find((r) => r.id === selectedRatio)?.label || '1:1';
 
   return (
     <div className="fab-dock-wrapper">
       <div className="fab-dock">
-        {/* Desplegable de Formatos intacto */}
+        {/* Desplegable de Formatos */}
         <div className="fab-dropdown-container">
           <button
             type="button"
             className={`neu-btn compact-btn ratio-trigger-btn ${ratioMenuOpen ? 'active' : ''}`}
-            onClick={() => setRatioMenuOpen(!ratioMenuOpen)}
+            onClick={() => { setRatioMenuOpen(!ratioMenuOpen); setConfigMenuOpen(false); }}
             disabled={disabled}
             title="Elegir formato de imagen"
           >
@@ -58,9 +60,9 @@ export default function FloatingFabBar({
         <div className="fab-divider"></div>
 
         <div className="fab-actions">
-          {/* NUEVO: Selector de color en vivo, aparece solo si NO hay foto de fondo */}
+          {/* Selector de color de fondo si no hay foto */}
           {!hasBgImage && (
-            <div className="color-picker-wrapper" title="Cambiar color de fondo">
+            <div className="color-picker-wrapper" title="Color de fondo">
               <input
                 type="color"
                 className="color-picker-input"
@@ -75,6 +77,16 @@ export default function FloatingFabBar({
           <button
             type="button"
             className="neu-btn compact-btn"
+            onClick={onCenterProduct}
+            disabled={disabled}
+            title="Centrar producto"
+          >
+            <Focus size={18} />
+          </button>
+
+          <button
+            type="button"
+            className="neu-btn compact-btn"
             onClick={onRelayoutHud}
             disabled={disabled}
             title="Reordenar etiquetas HUD"
@@ -82,15 +94,70 @@ export default function FloatingFabBar({
             <LayoutGrid size={18} />
           </button>
 
-          <button
-            type="button"
-            className="neu-btn compact-btn"
-            onClick={onCenterProduct}
-            disabled={disabled}
-            title="Centrar producto"
-          >
-            <Focus size={18} />
-          </button>
+          {/* Menú Desplegable de Configuración Visual (HUD) */}
+          <div className="fab-dropdown-container">
+            <button
+              type="button"
+              className={`neu-btn compact-btn ${configMenuOpen ? 'active' : ''}`}
+              onClick={() => { setConfigMenuOpen(!configMenuOpen); setRatioMenuOpen(false); }}
+              disabled={disabled}
+              title="Personalizar visual del HUD"
+            >
+              <Sliders size={18} />
+            </button>
+
+            <div className={`fab-config-menu ${configMenuOpen ? 'open' : ''}`}>
+              <span className="fab-config-title" style={{ textAlign: 'center' }}>Estilo Visual HUD</span>
+              
+              <div className="config-group">
+                <label>Tipografía</label>
+                <select
+                  className="neu-select"
+                  value={hudConfig.fontFamily}
+                  onChange={(e) => onUpdateHudConfig('fontFamily', e.target.value)}
+                >
+                  <option value="Plus Jakarta Sans">High-Tech (Jakarta)</option>
+                  <option value="Harman Retro">Vintage (Harman Retro)</option>
+                  <option value="Arial">Clásica (Arial)</option>
+                </select>
+              </div>
+
+              <div className="config-group">
+                <label>Tamaño de textos</label>
+                <input
+                  type="range"
+                  className="neu-slider"
+                  min="0.5"
+                  max="2.0"
+                  step="0.1"
+                  value={hudConfig.fontScale}
+                  onChange={(e) => onUpdateHudConfig('fontScale', parseFloat(e.target.value))}
+                />
+              </div>
+
+              <div className="config-colors">
+                <div className="color-picker-wrapper outline" title="Color Título">
+                  <input
+                    type="color"
+                    className="color-picker-input"
+                    value={hudConfig.colorKey}
+                    onChange={(e) => onUpdateHudConfig('colorKey', e.target.value)}
+                  />
+                  <span className="color-label" style={{ color: hudConfig.colorKey }}>Títulos</span>
+                </div>
+
+                <div className="color-picker-wrapper outline" title="Color Líneas y Valor">
+                  <input
+                    type="color"
+                    className="color-picker-input"
+                    value={hudConfig.colorMain}
+                    onChange={(e) => onUpdateHudConfig('colorMain', e.target.value)}
+                  />
+                  <span className="color-label" style={{ color: hudConfig.colorMain }}>Neón</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <button
             type="button"
