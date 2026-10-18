@@ -270,11 +270,19 @@ export default function App() {
   };
 
   // Actualizar configuración del HUD en VIVO (sin reiniciar ni tocar FastAPI)
-  const handleUpdateHudConfig = (field, value) => {
+  const handleUpdateHudConfig = async (field, value) => {
     const newConfig = { ...hudConfig, [field]: value };
     setHudConfig(newConfig);
     
     if (canvasRef.current) {
+      if (field === 'fontFamily') {
+        try {
+          await document.fonts.load(`16px "${value}"`);
+        } catch (error) {
+          console.warn(`La fuente ${value} tardó en responder.`);
+        }
+      }
+      
       renderHudSpecifications(canvasRef.current, specs, productFabricObjRef.current, newConfig);
     }
   };
