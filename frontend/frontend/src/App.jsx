@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import * as fabricModule from 'fabric';
 const fabric = fabricModule.fabric || fabricModule.default?.fabric || fabricModule.default || window.fabric;
+import { AlertTriangle } from 'lucide-react';
 import TopNavPill from './components/TopNavPill';
 import ConfigPanel from './components/ConfigPanel';
 import WorkspaceCanvas from './components/WorkspaceCanvas';
@@ -11,15 +12,20 @@ import {
   renderHudSpecifications,
 } from './utils/hudBuilder';
 
-const INITIAL_SPECS = [
-  { id: 1, posicion: 'izquierda', clave: 'TIPO DE TELA', valor: 'Algodón 100%' },
-  { id: 2, posicion: 'izquierda', clave: 'TALLAS', valor: 'S, M, L, XL' },
-  { id: 3, posicion: 'derecha', clave: 'PRECIO', valor: '$15.00' },
-];
+// Generador de especificación vacía para iniciar limpio y para el reseteo
+const getEmptySpec = () => ({
+  id: Date.now(),
+  posicion: 'izquierda',
+  clave: '',
+  valor: '',
+});
 
 export default function App() {
   // Navegación horizontal ('panel' | 'studio')
   const [activeView, setActiveView] = useState('panel');
+
+  // Estado del Modal de Reseteo
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   // Archivos e imágenes en caché
   const [bgFile, setBgFile] = useState(null);
@@ -33,8 +39,8 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
 
-  // Especificaciones y Formato de salida
-  const [specs, setSpecs] = useState(INITIAL_SPECS);
+  // Especificaciones inician con 1 solo campo vacío
+  const [specs, setSpecs] = useState([getEmptySpec()]);
   const [selectedRatio, setSelectedRatio] = useState('original');
   const [logicalSize, setLogicalSize] = useState({ width: 1080, height: 1080 });
 
@@ -147,7 +153,7 @@ export default function App() {
     try {
       // Si el producto cambió, llamamos a FastAPI
       if (needsAiCall || !productFabricObjRef.current) {
-        setStatusMsg('Procesando...');
+        setStatusMsg('Recortando fondo y realzando detalles con IA...');
         const formData = new FormData();
         formData.append('file', productFile);
 
@@ -174,7 +180,7 @@ export default function App() {
         setNeedsAiCall(false);
       }
 
-      setStatusMsg('Maquetando escenario...');
+      setStatusMsg('Maquetando escenario interactivo...');
       await composeScene(
         selectedRatio,
         productFabricObjRef.current,
@@ -241,9 +247,13 @@ export default function App() {
     link.click();
   };
 
-  // Reinicio completo (Botón circular superior)
-  const handleResetAll = () => {
-    if (!window.confirm('¿Deseas reiniciar el lienzo y limpiar los insumos?')) return;
+  // Abre el modal en lugar del alert del navegador
+  const handleResetClick = () => {
+    setIsResetModalOpen(true);
+  };
+
+  // Ejecuta la limpieza real y cierra el modal
+  const confirmReset = () => {
     if (canvasRef.current) {
       canvasRef.current.clear();
       canvasRef.current.setBackgroundColor('#14112E', canvasRef.current.renderAll.bind(canvasRef.current));
@@ -254,26 +264,26 @@ export default function App() {
     setBgPreview(null);
     setProductFile(null);
     setProductPreview(null);
-    setSpecs(INITIAL_SPECS);
+    setSpecs([getEmptySpec()]);
     setSelectedRatio('original');
     setHasRender(false);
     setNeedsAiCall(true);
     setActiveView('panel');
+    setIsResetModalOpen(false);
   };
 
   return (
     <div className="app-shell">
-
       {/* Píldora superior de navegación */}
       <TopNavPill
         activeView={activeView}
         setActiveView={setActiveView}
         specsCount={specs.filter((s) => s.clave.trim() && s.valor.trim()).length}
         hasRender={hasRender}
-        onResetAll={handleResetAll}
+        onResetAll={handleResetClick}
       />
 
-      {/* Indicador de estado flotante (Heurística #1 de Nielsen) */}
+      {/* Indicador de estado flotante */}
       {statusMsg && <div className="status-banner">{statusMsg}</div>}
 
       {/* Carrusel de transición horizontal */}
@@ -319,6 +329,37 @@ export default function App() {
         onDownload={handleDownload}
         disabled={!hasRender || isProcessing}
       />
+
+      {/* MODAL PERSONALIZADO DE REINICIO */}
+      {isResetModalOpen && (
+        <div className="modal-overlay">
+          <div className="neu-modal">
+            <div className="modal-icon-wrapper">
+              <AlertTriangle size={32} />
+            </div>
+            <h3 className="modal-title">¿Reiniciar proyecto?</h3>
+            <p className="modal-desc">
+              Se perderán todos los insumos cargados y el renderizado actual.
+            </p>
+            <div className="modal-actions">
+              <button 
+                type="button" 
+                className="neu-btn" 
+                onClick={() => setIsResetModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button" 
+                className="neu-btn neu-btn-danger-solid" 
+                onClick={confirmReset}
+              >
+                Reiniciar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
