@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ImagePlus, Shirt, Plus, Trash2, Wand2, RefreshCw, AlignLeft, AlignRight, ListPlus } from 'lucide-react';
 
 export default function ConfigPanel({
@@ -18,6 +19,28 @@ export default function ConfigPanel({
   hudConfig,
   onUpdateHudConfig,
 }) {
+  const [dragActiveBg, setDragActiveBg] = useState(false);
+  const [dragActiveProduct, setDragActiveProduct] = useState(false);
+
+  const handleDragEnter = (e, setDragState) => {
+    e.preventDefault(); e.stopPropagation(); setDragState(true);
+  };
+  const handleDragLeave = (e, setDragState) => {
+    e.preventDefault(); e.stopPropagation(); setDragState(false);
+  };
+  const handleDragOver = (e) => { 
+    e.preventDefault(); e.stopPropagation(); 
+  };
+  const handleDrop = (e, setDragState, callback) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragState(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      // Pasamos la foto en calidad cruda (sin compresión)
+      callback(e.dataTransfer.files[0]);
+    }
+  };
+  
   return (
     <div className="panel-grid">
       {/* COLUMNA 1: INSUMOS FOTOGRÁFICOS */}
@@ -30,7 +53,13 @@ export default function ConfigPanel({
         </div>
 
         {/* Selector de Fondo */}
-        <label className="upload-zone">
+        <label 
+          className={`upload-zone ${dragActiveBg ? 'drag-active' : ''}`}
+          onDragEnter={(e) => handleDragEnter(e, setDragActiveBg)}
+          onDragLeave={(e) => handleDragLeave(e, setDragActiveBg)}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, setDragActiveBg, onSelectBg)}
+        >
           <input
             type="file"
             accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
@@ -55,7 +84,13 @@ export default function ConfigPanel({
         </label>
 
         {/* Selector de Producto */}
-        <label className="upload-zone">
+        <label 
+          className={`upload-zone ${dragActiveProduct ? 'drag-active' : ''}`}
+          onDragEnter={(e) => handleDragEnter(e, setDragActiveProduct)}
+          onDragLeave={(e) => handleDragLeave(e, setDragActiveProduct)}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, setDragActiveProduct, onSelectProduct)}
+        >
           <input
             type="file"
             accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
