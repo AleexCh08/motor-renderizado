@@ -84,7 +84,12 @@ export default function ConfigPanel({
         </div>
 
         <div className="specs-list">
-          {specs.map((item) => (
+          {specs.length === 0 ? (
+            <div className="empty-specs-msg">
+              Presione "Agregar" para añadir especificación
+            </div>
+          ) : (
+          specs.map((item) => (
             <div className="spec-row" key={item.id}>
               <select
                 className="neu-select"
@@ -122,7 +127,7 @@ export default function ConfigPanel({
                 <Trash2 size={15} />
               </button>
             </div>
-          ))}
+          )))}
         </div>
 
         <button

@@ -335,6 +335,19 @@ html, body, #root {
   padding-right: 4px;
 }
 
+/* Mensaje de estado vacío para especificaciones */
+.empty-specs-msg {
+  padding: 20px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  border: 1px dashed rgba(221, 247, 255, 0.15);
+  border-radius: var(--radius-sm);
+  background-color: rgba(10, 17, 36, 0.4);
+  margin-top: 8px;
+}
+
 /* Scrollbar técnica para la lista */
 .specs-list::-webkit-scrollbar { width: 6px; }
 .specs-list::-webkit-scrollbar-track { background: var(--bg-input); }
