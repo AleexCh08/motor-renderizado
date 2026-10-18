@@ -914,7 +914,7 @@ ESPECIFICACIONES: MOBILE-FIRST BLINDADO
   justify-content: center;
   z-index: 9999;
   padding: 20px;
-  animation: fadeIn 200ms ease-out;
+  animation: fadeIn 200ms ease-out forwards;
 }
 
 .neu-modal {
@@ -931,7 +931,7 @@ ESPECIFICACIONES: MOBILE-FIRST BLINDADO
   align-items: center;
   text-align: center;
   gap: 16px;
-  animation: slideUp 400ms var(--transition-bouncy);
+  animation: slideUp var(--transition-bouncy) forwards;
 }
 
 .modal-icon-wrapper {
