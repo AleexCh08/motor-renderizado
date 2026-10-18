@@ -77,16 +77,16 @@ export default function ConfigPanel({
                 <ListPlus size={18} />
                 2. Especificaciones
             </h2>
-            <button type="button" className="neu-btn" onClick={onAddSpec} style={{ padding: '8px 12px', fontSize: '0.6rem' }}>
-                <Plus size={15} />
-                Agregar
+            <button type="button" className="neu-btn" onClick={onAddSpec} style={{ padding: '8px 12px', fontSize: '0.78rem' }}>
+                <Plus size={18} />
+                
             </button>
         </div>
 
         <div className="specs-list">
           {specs.length === 0 ? (
             <div className="empty-specs-msg">
-              Presione "Agregar" para añadir especificación
+              Presione "+" para añadir especificación
             </div>
           ) : (
           specs.map((item) => (
