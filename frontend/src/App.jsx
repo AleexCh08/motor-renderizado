@@ -169,7 +169,7 @@ export default function App() {
     try {
       // Si el producto cambió, llamamos a FastAPI
       if (needsAiCall || !productFabricObjRef.current) {
-        setStatusMsg('Recortando fondo y realzando detalles con IA...');
+        setStatusMsg('Recortando fondo ...');
         const formData = new FormData();
         formData.append('file', productFile);
 
@@ -196,7 +196,7 @@ export default function App() {
         setNeedsAiCall(false);
       }
 
-      setStatusMsg('Maquetando escenario interactivo...');
+      setStatusMsg('Maquetando escenario ...');
       await composeScene(
         selectedRatio,
         productFabricObjRef.current,
@@ -323,7 +323,16 @@ export default function App() {
       />
 
       {/* Indicador de estado flotante */}
-      {statusMsg && <div className="status-banner">{statusMsg}</div>}
+      {statusMsg && (
+        <div className="global-loader-overlay">
+          <div className="tech-spinner-container">
+            <div className="tech-spinner-ring outer"></div>
+            <div className="tech-spinner-ring inner"></div>
+            <div className="tech-spinner-core"></div>
+          </div>
+          <div className="loader-text">{statusMsg}</div>
+        </div>
+      )}
 
       {/* Carrusel de transición horizontal */}
       <main className="viewport-slider">
