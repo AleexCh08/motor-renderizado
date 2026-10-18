@@ -43,6 +43,7 @@ export default function App() {
   const [specs, setSpecs] = useState([getEmptySpec()]);
   const [selectedRatio, setSelectedRatio] = useState('original');
   const [logicalSize, setLogicalSize] = useState({ width: 1080, height: 1080 });
+  const [bgColor, setBgColor] = useState('#14112E');
 
   // Referencias a objetos de Fabric.js en memoria
   const canvasRef = useRef(null);
@@ -112,6 +113,9 @@ export default function App() {
 
       // 1. Aplicar fondo en modo Cover
       applyBackgroundCover(canvas, bgObj, dims.width, dims.height);
+    if (!bgObj) {
+      canvas.setBackgroundColor(bgColor, canvas.renderAll.bind(canvas));
+    }
 
       // 2. Posicionar el producto centrado y escalado al 68% de la altura
       if (prodObj) {
@@ -209,6 +213,15 @@ export default function App() {
       bgFabricObjRef.current,
       specs
     );
+  };
+
+  // Cambiar el color del fondo en vivo sin recargar la escena
+  const handleChangeBgColor = (newColor) => {
+    setBgColor(newColor);
+    const canvas = canvasRef.current;
+    if (canvas && !bgFabricObjRef.current) {
+      canvas.setBackgroundColor(newColor, canvas.renderAll.bind(canvas));
+    }
   };
 
   // Acciones rápidas del FAB
@@ -314,6 +327,7 @@ export default function App() {
             <WorkspaceCanvas
               onCanvasReady={handleCanvasReady}
               logicalSize={logicalSize}
+              hasRender={hasRender}
             />
           </div>
         </div>
@@ -328,6 +342,9 @@ export default function App() {
         onRelayoutHud={handleRelayoutHud}
         onDownload={handleDownload}
         disabled={!hasRender || isProcessing}
+        hasBgImage={bgFile !== null}
+        bgColor={bgColor}
+        onChangeBgColor={handleChangeBgColor}
       />
 
       {/* MODAL PERSONALIZADO DE REINICIO */}

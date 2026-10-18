@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, Focus, LayoutGrid, Crop } from 'lucide-react';
+import { Download, Focus, LayoutGrid, Crop, Palette } from 'lucide-react';
 import { ASPECT_RATIOS } from '../utils/hudBuilder';
 
 export default function FloatingFabBar({
@@ -10,6 +10,9 @@ export default function FloatingFabBar({
   onRelayoutHud,
   onDownload,
   disabled,
+  hasBgImage,
+  bgColor, 
+  onChangeBgColor,
 }) {
   const [ratioMenuOpen, setRatioMenuOpen] = useState(false);
 
@@ -21,8 +24,7 @@ export default function FloatingFabBar({
   return (
     <div className="fab-dock-wrapper">
       <div className="fab-dock">
-        
-        {/* Contenedor del Botón Desplegable de Formatos */}
+        {/* Desplegable de Formatos intacto */}
         <div className="fab-dropdown-container">
           <button
             type="button"
@@ -35,7 +37,6 @@ export default function FloatingFabBar({
             <span className="current-ratio-text">{currentRatioLabel}</span>
           </button>
 
-          {/* Menú flotante con las opciones (se abre hacia arriba) */}
           <div className={`fab-dropdown-menu ${ratioMenuOpen ? 'open' : ''}`}>
             {ASPECT_RATIOS.map((r) => (
               <button
@@ -44,7 +45,7 @@ export default function FloatingFabBar({
                 className={`dropdown-item ${selectedRatio === r.id ? 'active' : ''}`}
                 onClick={() => {
                   onSelectRatio(r.id);
-                  setRatioMenuOpen(false); // Cierra el menú al elegir
+                  setRatioMenuOpen(false);
                 }}
                 disabled={disabled}
               >
@@ -56,8 +57,21 @@ export default function FloatingFabBar({
 
         <div className="fab-divider"></div>
 
-        {/* Acciones Rápidas (Se mantienen iguales) */}
         <div className="fab-actions">
+          {/* NUEVO: Selector de color en vivo, aparece solo si NO hay foto de fondo */}
+          {!hasBgImage && (
+            <div className="color-picker-wrapper" title="Cambiar color de fondo">
+              <input
+                type="color"
+                className="color-picker-input"
+                value={bgColor}
+                onChange={(e) => onChangeBgColor(e.target.value)}
+                disabled={disabled}
+              />
+              <Palette size={16} className="color-picker-icon" />
+            </div>
+          )}
+
           <button
             type="button"
             className="neu-btn compact-btn"
