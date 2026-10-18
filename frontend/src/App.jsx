@@ -12,6 +12,7 @@ import {
   renderHudSpecifications,
 } from './utils/hudBuilder';
 import NotFound from './components/NotFound';
+import HelpModal from './components/HelpModal';
 
 // Generador de especificación vacía para iniciar limpio y para el reseteo
 const getEmptySpec = () => ({
@@ -74,6 +75,9 @@ export default function App() {
   const canvasRef = useRef(null);
   const bgFabricObjRef = useRef(null);
   const productFabricObjRef = useRef(null);
+
+  // Estado del Modal de Ayuda
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -421,6 +425,7 @@ export default function App() {
               isProcessing={isProcessing}
               needsAiCall={needsAiCall}
               hasRender={hasRender}
+              onOpenHelp={() => setIsHelpOpen(true)}
             />
           </div>
 
@@ -523,6 +528,11 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* MODAL DE AYUDA (?) */}
+      {isHelpOpen && (
+        <HelpModal onClose={() => setIsHelpOpen(false)} />
       )}
     </div>
   );

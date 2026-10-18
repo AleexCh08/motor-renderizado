@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ImagePlus, Shirt, Plus, Trash2, Wand2, RefreshCw, AlignLeft, AlignRight, ListPlus } from 'lucide-react';
+import { ImagePlus, Shirt, Plus, Trash2, Wand2, RefreshCw, AlignLeft, AlignRight, ListPlus, HelpCircle } from 'lucide-react';
 
 export default function ConfigPanel({
   bgPreview,
@@ -18,6 +18,7 @@ export default function ConfigPanel({
   hasRender,
   hudConfig,
   onUpdateHudConfig,
+  onOpenHelp,
 }) {
   const [dragActiveBg, setDragActiveBg] = useState(false);
   const [dragActiveProduct, setDragActiveProduct] = useState(false);
@@ -50,6 +51,15 @@ export default function ConfigPanel({
             <ImagePlus size={18} />
             1. Insumos Visuales
           </h2>
+          <button 
+            type="button" 
+            className="neu-btn compact-btn" 
+            onClick={onOpenHelp}
+            title="¿Cómo funciona?"
+            style={{ width: '34px', height: '34px', minHeight: '34px', padding: 0 }}
+          >
+            <HelpCircle size={18} />
+          </button>
         </div>
 
         {/* Selector de Fondo */}
