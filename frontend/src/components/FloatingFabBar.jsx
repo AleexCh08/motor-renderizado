@@ -117,8 +117,11 @@ export default function FloatingFabBar({
                   onChange={(e) => onUpdateHudConfig('fontFamily', e.target.value)}
                 >
                   <option value="Plus Jakarta Sans">High-Tech (Jakarta)</option>
+                  <option value="Orbitron">Sci-Fi Puro (Orbitron)</option>
+                  <option value="Montserrat">Premium (Montserrat)</option>
+                  <option value="Oswald">Impacto (Oswald)</option>
+                  <option value="Cinzel">Lujo / Joyería (Cinzel)</option>
                   <option value="Harman Retro">Vintage (Harman Retro)</option>
-                  <option value="Arial">Clásica (Arial)</option>
                 </select>
               </div>
 

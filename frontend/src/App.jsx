@@ -100,7 +100,7 @@ export default function App() {
 
   // Función que ensambla o actualiza el lienzo según proporción, fondo, producto y HUD
   const composeScene = useCallback(
-    async (ratioId, prodObj, bgObj, currentSpecs, currentBgColor) => {
+    async (ratioId, prodObj, bgObj, currentSpecs, currentBgColor, currentHudConfig) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
@@ -149,7 +149,7 @@ export default function App() {
       }
 
       // 3. Dibujar especificaciones HUD alrededor
-      renderHudSpecifications(canvas, currentSpecs, prodObj, hudConfig);
+      renderHudSpecifications(canvas, currentSpecs, prodObj, currentHudConfig);
       canvas.renderAll();
     },
     []
@@ -197,7 +197,8 @@ export default function App() {
         productFabricObjRef.current,
         bgFabricObjRef.current,
         specs,
-        bgColor
+        bgColor,
+        hudConfig
       );
 
       setHasRender(true);
@@ -220,7 +221,8 @@ export default function App() {
       productFabricObjRef.current,
       bgFabricObjRef.current,
       specs,
-      bgColor
+      bgColor,
+      hudConfig
     );
   };
 
