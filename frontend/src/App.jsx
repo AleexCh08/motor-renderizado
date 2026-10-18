@@ -140,22 +140,26 @@ export default function App() {
 
       // 2. Posicionar el producto centrado y escalado al 68% de la altura
       if (prodObj) {
-        if (!canvas.getObjects().includes(prodObj)) {
+        const isNew = !canvas.getObjects().includes(prodObj);
+        
+        if (isNew) {
           canvas.add(prodObj);
+          prodObj.scaleToHeight(dims.height * 0.68);
+          canvas.centerObject(prodObj);
         }
-        prodObj.scaleToHeight(dims.height * 0.68);
+        
+        // Solo actualizamos colores y bordes, respetando su rotación, escala y posición actual
         prodObj.set({
-          angle: 0,
           borderColor: currentHudConfig ? currentHudConfig.colorMain : '#00D9FF',
           cornerColor: '#050B1A',
           cornerStrokeColor: currentHudConfig ? currentHudConfig.colorMain : '#00D9FF',
           transparentCorners: false,
-          cornerSize: 18,           // Tamaño visual agradable del círculo
-          touchCornerSize: 48,      // CRÍTICO EN MÓVIL: Área táctil invisible gigante para los pulgares
-          cornerStyle: 'circle',    // Estilo moderno circular
-          padding: 16,              // Separa la caja delimitadora de la prenda para no taparla
-          rotatingPointOffset: 50,  // Aleja la varilla de rotación para que el dedo no tape la imagen
-          borderDashArray: [6, 6],  // Borde punteado tecnológico
+          cornerSize: 18,
+          touchCornerSize: 48,
+          cornerStyle: 'circle',
+          padding: 16,
+          rotatingPointOffset: 50,
+          borderDashArray: [6, 6],
           shadow: new fabric.Shadow({
             color: 'rgba(0,0,0,0.62)',
             blur: Math.floor(Math.min(dims.width, dims.height) * 0.025),
@@ -163,7 +167,6 @@ export default function App() {
             offsetY: Math.floor(dims.height * 0.015),
           }),
         });
-        canvas.centerObject(prodObj);
         prodObj.setCoords();
       }
 
@@ -396,6 +399,7 @@ export default function App() {
         onChangeBgColor={handleChangeBgColor}
         hudConfig={hudConfig}
         onUpdateHudConfig={handleUpdateHudConfig}
+        hasSpecs={specs.filter((s) => s.clave.trim() && s.valor.trim()).length > 0}
       />
 
       {/* MODAL PERSONALIZADO DE REINICIO */}

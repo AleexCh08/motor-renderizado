@@ -15,6 +15,7 @@ export default function FloatingFabBar({
   onChangeBgColor,
   hudConfig,
   onUpdateHudConfig,
+  hasSpecs,
 }) {
   const [ratioMenuOpen, setRatioMenuOpen] = useState(false);
   const [configMenuOpen, setConfigMenuOpen] = useState(false);
@@ -84,83 +85,87 @@ export default function FloatingFabBar({
             <Focus size={18} />
           </button>
 
-          <button
-            type="button"
-            className="neu-btn compact-btn"
-            onClick={onRelayoutHud}
-            disabled={disabled}
-            title="Reordenar etiquetas HUD"
-          >
-            <LayoutGrid size={18} />
-          </button>
+          {hasSpecs && (
+            <>
+              <button
+                type="button"
+                className="neu-btn compact-btn"
+                onClick={onRelayoutHud}
+                disabled={disabled}
+                title="Reordenar etiquetas HUD"
+              >
+                <LayoutGrid size={18} />
+              </button>
 
-          {/* Menú Desplegable de Configuración Visual (HUD) */}
-          <div className="fab-dropdown-container">
-            <button
-              type="button"
-              className={`neu-btn compact-btn ${configMenuOpen ? 'active' : ''}`}
-              onClick={() => { setConfigMenuOpen(!configMenuOpen); setRatioMenuOpen(false); }}
-              disabled={disabled}
-              title="Personalizar visual del HUD"
-            >
-              <Sliders size={18} />
-            </button>
-
-            <div className={`fab-config-menu ${configMenuOpen ? 'open' : ''}`}>
-              <span className="fab-config-title" style={{ textAlign: 'center' }}>Estilo Visual HUD</span>
-              
-              <div className="config-group">
-                <label>Tipografía</label>
-                <select
-                  className="neu-select"
-                  value={hudConfig.fontFamily}
-                  onChange={(e) => onUpdateHudConfig('fontFamily', e.target.value)}
+              {/* Menú Desplegable de Configuración Visual (HUD) */}
+              <div className="fab-dropdown-container">
+                <button
+                  type="button"
+                  className={`neu-btn compact-btn ${configMenuOpen ? 'active' : ''}`}
+                  onClick={() => { setConfigMenuOpen(!configMenuOpen); setRatioMenuOpen(false); }}
+                  disabled={disabled}
+                  title="Personalizar visual del HUD"
                 >
-                  <option value="Plus Jakarta Sans">High-Tech (Jakarta)</option>
-                  <option value="Orbitron">Sci-Fi Puro (Orbitron)</option>
-                  <option value="Montserrat">Premium (Montserrat)</option>
-                  <option value="Oswald">Impacto (Oswald)</option>
-                  <option value="Cinzel">Lujo / Joyería (Cinzel)</option>
-                  <option value="Harman Retro">Vintage (Harman Retro)</option>
-                </select>
-              </div>
+                  <Sliders size={18} />
+                </button>
 
-              <div className="config-group">
-                <label>Tamaño de textos</label>
-                <input
-                  type="range"
-                  className="neu-slider"
-                  min="0.5"
-                  max="2.0"
-                  step="0.1"
-                  value={hudConfig.fontScale}
-                  onChange={(e) => onUpdateHudConfig('fontScale', parseFloat(e.target.value))}
-                />
-              </div>
+                <div className={`fab-config-menu ${configMenuOpen ? 'open' : ''}`}>
+                  <span className="fab-config-title">Estilo Visual HUD</span>
+                  
+                  <div className="config-group">
+                    <label>Tipografía</label>
+                    <select
+                      className="neu-select"
+                      value={hudConfig.fontFamily}
+                      onChange={(e) => onUpdateHudConfig('fontFamily', e.target.value)}
+                    >
+                      <option value="Plus Jakarta Sans">High-Tech (Jakarta)</option>
+                      <option value="Orbitron">Sci-Fi Puro (Orbitron)</option>
+                      <option value="Montserrat">Premium (Montserrat)</option>
+                      <option value="Oswald">Impacto (Oswald)</option>
+                      <option value="Cinzel">Lujo / Joyería (Cinzel)</option>
+                      <option value="Harman Retro">Vintage (Harman Retro)</option>
+                    </select>
+                  </div>
 
-              <div className="config-colors">
-                <div className="color-picker-wrapper outline" title="Color Título">
-                  <input
-                    type="color"
-                    className="color-picker-input"
-                    value={hudConfig.colorKey}
-                    onChange={(e) => onUpdateHudConfig('colorKey', e.target.value)}
-                  />
-                  <span className="color-label" style={{ color: hudConfig.colorKey }}>Títulos</span>
+                  <div className="config-group">
+                    <label>Tamaño de textos</label>
+                    <input
+                      type="range"
+                      className="neu-slider"
+                      min="0.5"
+                      max="2.0"
+                      step="0.1"
+                      value={hudConfig.fontScale}
+                      onChange={(e) => onUpdateHudConfig('fontScale', parseFloat(e.target.value))}
+                    />
+                  </div>
+
+                  <div className="config-colors">
+                    <div className="color-picker-wrapper outline" title="Color Título">
+                      <input
+                        type="color"
+                        className="color-picker-input"
+                        value={hudConfig.colorKey}
+                        onChange={(e) => onUpdateHudConfig('colorKey', e.target.value)}
+                      />
+                      <span className="color-label" style={{ color: hudConfig.colorKey }}>Títulos</span>
+                    </div>
+
+                    <div className="color-picker-wrapper outline" title="Color Líneas y Valor">
+                      <input
+                        type="color"
+                        className="color-picker-input"
+                        value={hudConfig.colorMain}
+                        onChange={(e) => onUpdateHudConfig('colorMain', e.target.value)}
+                      />
+                      <span className="color-label" style={{ color: hudConfig.colorMain }}>Neón</span>
+                    </div>
+                  </div>
                 </div>
-
-                <div className="color-picker-wrapper outline" title="Color Líneas y Valor">
-                  <input
-                    type="color"
-                    className="color-picker-input"
-                    value={hudConfig.colorMain}
-                    onChange={(e) => onUpdateHudConfig('colorMain', e.target.value)}
-                  />
-                  <span className="color-label" style={{ color: hudConfig.colorMain }}>Neón</span>
-                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
           <button
             type="button"
