@@ -297,7 +297,7 @@ export default function App() {
     link.download = `render_producto_${ratioTag}.jpg`;
     link.href = canvas.toDataURL({
       format: 'jpeg',
-      quality: 0.95,
+      quality: 1.0,
       multiplier: 1,
     });
     link.click();

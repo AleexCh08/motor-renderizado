@@ -18,8 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# OPTIMIZACIÓN CRÍTICA: Inicializar la sesión de IA globalmente
-print("Cargando modelo de IA (U-2-Net) en la memoria RAM...")
+# OPTIMIZACIÓN CRÍTICA: Inicializar modelo globalmente en RAM
+print("Cargando modelo de IA (U-2-Net)...")
 session_ia = new_session("u2net")
 print("Modelo cargado. Servidor listo para recibir fotos.")
 
@@ -52,8 +52,8 @@ async def procesar_imagen(file: UploadFile = File(...)):
                 post_process_mask=True,
                 alpha_matting=True,
                 alpha_matting_foreground_threshold=240,
-                alpha_matting_background_threshold=10, # Bajado a 10 para no comerse las sombras suaves
-                alpha_matting_erode_size=10 # Bajado a 10 para no decapitar cuellos de franelas ni hilos
+                alpha_matting_background_threshold=10, # Protege sombras suaves
+                alpha_matting_erode_size=10 # Protege hilos y texturas delgadas
             )
         
         # 3. ENCUADRE: Auto-recorte del aire transparente
@@ -78,8 +78,6 @@ async def procesar_imagen(file: UploadFile = File(...)):
         imagen_rgb = realzador_contraste.enhance(1.08)
 
         # 4.3 Máscara de Enfoque (Unsharp Masking - Técnica Fotográfica Profesional)
-        # Esto es infinitamente superior a ImageEnhance.Sharpness. Detecta bordes por umbral y 
-        # aumenta el microcontraste sin inyectar ruido ("grano") en la ropa plana.
         imagen_rgb = imagen_rgb.filter(ImageFilter.UnsharpMask(radius=2, percent=125, threshold=3))
         
         # 4.4 Reensamblar: Juntar la foto mejorada con la máscara de recorte original e intacta
