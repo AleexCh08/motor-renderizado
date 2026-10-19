@@ -1,0 +1,38 @@
+name: Sync Backend to Hugging Face Space
+
+on:
+  push:
+    branches:
+      - main  # Cambia a 'master' si esa es tu rama principal
+    paths:
+      - 'backend/**' # Solo sincroniza si modificas archivos en la carpeta backend
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          
+          # Hacemos un clone del space de Hugging Face
+          git clone https://user:$HF_TOKEN@huggingface.co/spaces/TU_USUARIO_HF/TU_SPACE_HF hf_space
+          
+          # Copiamos el contenido de la carpeta backend al clone
+          cp -r backend/* hf_space/
+          
+          cd hf_space
+          git add .
+          
+          # Commit y push (evita fallar si no hay cambios)
+          git commit -m "Sync desde GitHub (Acción Automatizada)" || echo "No hay cambios para subir"
+          git push origin main
