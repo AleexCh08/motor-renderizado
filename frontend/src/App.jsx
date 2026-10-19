@@ -1,6 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import * as fabricModule from 'fabric';
 const fabric = fabricModule.fabric || fabricModule.default?.fabric || fabricModule.default || window.fabric;
+if (fabric.Text) {
+  fabric.Text.prototype.textBaseline = 'alphabetic';
+}
 import { AlertTriangle, CheckCircle2, AlertCircle, X, ArrowRight, MessageSquare } from 'lucide-react';
 import TopNavPill from './components/TopNavPill';
 import ConfigPanel from './components/ConfigPanel';
