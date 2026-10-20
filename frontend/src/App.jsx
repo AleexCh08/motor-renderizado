@@ -215,6 +215,12 @@ export default function App() {
         const formData = new FormData();
         formData.append('file', productFile);
 
+        // Apuntando al backend en Azure App Service
+        const res = await fetch('https://api-render-gjfdhacjgbbfeub0.brazilsouth-01.azurewebsites.net/api/process', {
+          method: 'POST',
+          body: formData,
+        });
+        /* 
         const res = await fetch('/api/process', {
           method: 'POST',
           body: formData,
@@ -222,7 +228,7 @@ export default function App() {
 
         if (!res.ok) {
           throw new Error(`Error del servidor: ${res.status}`);
-        }
+        }*/
 
         const blob = await res.blob();
         const processedUrl = URL.createObjectURL(blob);
