@@ -12,7 +12,7 @@ app = FastAPI(title="Motor de Franelas API")
 # Configuración CORS vital para que el Frontend web se pueda conectar
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://motor-renderizado.vercel.app/"], # Cambiar a * o la URL
+    allow_origins=["https://motor-renderizado.vercel.app"], # Cambiar a * o la URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
