@@ -216,7 +216,7 @@ export default function App() {
         formData.append('file', productFile);
 
         // Apuntando al backend en Azure App Service
-        const res = await fetch('https://api-render-gjfdhacjgbbfeub0.brazilsouth-01.azurewebsites.net/api/process', {
+        const res = await fetch('https://api-render-gjfdhacjgbbfeub0.brazilsouth-01.azurewebsites.net/process', {
           method: 'POST',
           body: formData,
         });
