@@ -234,10 +234,15 @@ export default function App() {
         const formData = new FormData();
         formData.append('file', productFile);
 
-        const res = await fetch('/api/process', {
+        const res = await fetch('https://wayne-lil-gives-popularity.trycloudflare.com/process', {
           method: 'POST',
           body: formData,
         });
+        /** 
+        const res = await fetch('/api/process', {
+          method: 'POST',
+          body: formData,
+        });*/
 
         if (!res.ok) {
           throw new Error(`Error del servidor: ${res.status}`);

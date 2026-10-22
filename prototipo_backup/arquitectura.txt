@@ -41,3 +41,18 @@ hoja de estilos aparte,
 Errores en main.py 
 No funciona en 192.168.1.6:5173
 
+
+Control dinámico de sombras: Herramienta para ajustar el ángulo, distancia, desenfoque y opacidad de la sombra del producto 
+mediante deslizadores. La sombra actual es estática y no coincide con todas las direcciones de luz de los distintos fondos.
+
+Corrección de iluminación y color: Controles de brillo, contraste, saturación y temperatura aplicados exclusivamente a la 
+capa del producto en el frontend para mimetizarlo con el ambiente del fondo seleccionado.
+
+Profundidad de campo para el fondo: Deslizador de desenfoque gaussiano aplicado a la imagen de fondo para simular el efecto 
+fotográfico de enfoque selectivo y aislar visualmente el producto.
+
+Inyección de logotipo o marca de agua: Espacio dedicado para cargar un archivo PNG independiente con el logo de la tienda, 
+con controles de opacidad y anclaje en las esquinas para proteger el render final.
+
+Guías de alineación magnética: Sistema de líneas invisibles en el lienzo que actúen como imanes al arrastrar los textos del 
+HUD, forzando una alineación geométrica aséptica sin depender del cálculo visual.
