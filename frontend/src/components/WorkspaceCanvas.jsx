@@ -1,12 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as fabricModule from 'fabric';
 const fabric = fabricModule.fabric || fabricModule.default?.fabric || fabricModule.default || window.fabric;
-import { ImageIcon } from 'lucide-react';
+import { ImageIcon, Maximize, Minimize } from 'lucide-react';
 
 export default function WorkspaceCanvas({ onCanvasReady, logicalSize, hasRender }) {
   const canvasElRef = useRef(null);
   const stageBoxRef = useRef(null);
   const fabricRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // 1. Inicializar Fabric.js UNA SOLA VEZ en la vida del componente
   useEffect(() => {
@@ -47,14 +48,13 @@ export default function WorkspaceCanvas({ onCanvasReady, logicalSize, hasRender 
       instance.dispose();
       fabricRef.current = null;
     };
-  }, [onCanvasReady]); // CRÍTICO: Se eliminó `hasRender` de aquí para que no mate a Fabric.js
+  }, [onCanvasReady]); 
 
   // 2. Escalado visual responsivo
   useEffect(() => {
     const updateVisualScale = () => {
       const canvas = fabricRef.current;
       const stage = stageBoxRef.current;
-      // Si el lienzo está oculto o no existe, no escalamos
       if (!canvas || !stage || !hasRender) return;
 
       const availW = Math.max(240, stage.clientWidth - 28);
@@ -77,10 +77,9 @@ export default function WorkspaceCanvas({ onCanvasReady, logicalSize, hasRender 
       canvas.renderAll();
     };
 
-    // Usamos un pequeño timeout para asegurar que el display: block ya hizo efecto en el DOM
     const timeoutId = setTimeout(updateVisualScale, 50);
-
     const observer = new ResizeObserver(updateVisualScale);
+    
     if (stageBoxRef.current) {
       observer.observe(stageBoxRef.current);
     }
@@ -93,10 +92,51 @@ export default function WorkspaceCanvas({ onCanvasReady, logicalSize, hasRender 
     };
   }, [logicalSize, hasRender]);
 
+  // 3. Lógica de Pantalla Completa (Mobile UX)
+  const toggleFullscreen = async () => {
+    if (!isFullscreen) {
+      setIsFullscreen(true);
+      try {
+        // Intento de API Nativa (Funciona excelente en Android/Chrome)
+        if (stageBoxRef.current.requestFullscreen) {
+          await stageBoxRef.current.requestFullscreen();
+          if (window.screen?.orientation?.lock) {
+            await window.screen.orientation.lock('landscape').catch(() => {});
+          }
+        }
+      } catch (err) {
+        console.warn("Fullscreen nativo no soportado por este navegador (iOS). Usando CSS Fallback.", err);
+      }
+    } else {
+      setIsFullscreen(false);
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        }
+        if (window.screen?.orientation?.unlock) {
+          window.screen.orientation.unlock();
+        }
+      } catch (err) {
+        console.warn("Error saliendo de fullscreen", err);
+      }
+    }
+  };
+
+  // Sincronizar estado si el usuario usa el botón "Atrás" de Android para salir
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [isFullscreen]);
+
   return (
-    <div className="canvas-stage-box" ref={stageBoxRef}>
+    <div className={`canvas-stage-box ${isFullscreen ? 'mobile-fullscreen-active' : ''}`} ref={stageBoxRef}>
       
-      {/* PANTALLA DE ESPERA (Se oculta con display: none pero no se destruye) */}
+      {/* PANTALLA DE ESPERA */}
       <div 
         className="empty-stage-placeholder" 
         style={{ display: hasRender ? 'none' : 'flex' }}
@@ -106,12 +146,24 @@ export default function WorkspaceCanvas({ onCanvasReady, logicalSize, hasRender 
         <p>Esperando producto e insumos...</p>
       </div>
 
-      {/* LIENZO INTERACTIVO (Se oculta con display: none para proteger la instancia) */}
+      {/* LIENZO INTERACTIVO */}
       <div 
         className="canvas-frame-neu" 
         style={{ display: hasRender ? 'inline-flex' : 'none' }}
       >
-        <canvas ref={canvasElRef} />
+        {/* BOTÓN PANTALLA COMPLETA: Inyectado permanentemente, oculto por el contenedor padre */}
+        <button 
+          className="fullscreen-toggle-btn" 
+          onClick={toggleFullscreen} 
+          title="Pantalla Completa"
+        >
+          {isFullscreen ? <Minimize size={20} color="#FF453A" /> : <Maximize size={20} color="#00D9FF" />}
+        </button>
+        
+        {/* ENVOLTORIO AISLANTE: Protege al canvas de las validaciones de React */}
+        <div className="fabric-isolation-wrapper">
+          <canvas ref={canvasElRef} />
+        </div>
       </div>
 
     </div>

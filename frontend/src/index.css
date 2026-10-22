@@ -2383,3 +2383,58 @@ textarea:focus-visible,
     justify-content: space-between;
   }
 }
+
+/* ==========================================================================
+   20. EXPERIENCIA MOBILE: PANTALLA COMPLETA DE LIENZO
+   ========================================================================== */
+.fullscreen-toggle-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 100;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background: rgba(5, 11, 26, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+.fullscreen-toggle-btn:active {
+  transform: scale(0.9);
+  background: rgba(16, 25, 50, 0.95);
+}
+
+@media (min-width: 820px) {
+  .fullscreen-toggle-btn {
+    display: none;
+  }
+}
+
+.canvas-stage-box.mobile-fullscreen-active {
+  position: fixed;
+  inset: 0;
+  z-index: 8000; 
+  background-color: var(--bg-body);
+  background-image: 
+    linear-gradient(rgba(186, 215, 247, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(186, 215, 247, 0.035) 1px, transparent 1px);
+  background-size: 88px 88px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: expandIn 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+@keyframes expandIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}

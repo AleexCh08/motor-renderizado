@@ -2999,3 +2999,68 @@ body {
   }
 }
 
+/* ==========================================================================
+   20. EXPERIENCIA MOBILE: PANTALLA COMPLETA DE LIENZO
+   ========================================================================== */
+
+.fullscreen-toggle-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 100;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background: rgba(199, 211, 234, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-panel);
+  transition: transform var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.fullscreen-toggle-btn:active {
+  transform: scale(0.93);
+  background: rgba(199, 211, 234, 0.09);
+}
+
+@media (min-width: 820px) {
+  .fullscreen-toggle-btn {
+    display: none;
+  }
+}
+
+.canvas-stage-box.mobile-fullscreen-active {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  background-color: var(--bg-body);
+  background-image: 
+    linear-gradient(rgba(186, 215, 247, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(186, 215, 247, 0.035) 1px, transparent 1px);
+  background-size: 88px 88px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: expandInPremium 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+.canvas-stage-box.mobile-fullscreen-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(0, 102, 255, 0.05), transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes expandInPremium {
+  from { opacity: 0; transform: scale(0.98); filter: blur(4px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
