@@ -1,4 +1,4 @@
-import { X, ImagePlus, ListPlus, Wand2, Download, Move, Crop, Palette, Focus, LayoutGrid, Sliders, RotateCcw } from 'lucide-react';
+import { X, ImagePlus, ListPlus, Wand2, Download, Move, Crop, Palette, Focus, LayoutGrid, Sliders, RotateCcw, Eraser } from 'lucide-react';
 
 export default function HelpModal({ onClose }) {
   return (
@@ -61,6 +61,11 @@ export default function HelpModal({ onClose }) {
               <div className="legend-item">
                 <div className="legend-icon"><Focus size={16} /></div>
                 <span><strong>Centrar Producto:</strong> Devuelve la foto al medio exacto de la pantalla con su tamaño original.</span>
+              </div>
+
+              <div className="legend-item">
+                <div className="legend-icon"><Eraser size={16} /></div>
+                <span><strong>Pulir Recorte:</strong> Abre el quirófano de edición para borrar manualmente los restos de fondo que la IA no haya eliminado.</span>
               </div>
 
               <div className="legend-item">
