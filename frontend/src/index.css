@@ -822,15 +822,14 @@ html, body, #root {
 }
 
 .fab-dropdown-container {
-  position: relative;
   display: flex;
   align-items: center;
 }
 
-.fab-dropdown-menu,
 .fab-config-menu {
   position: absolute;
   bottom: calc(100% + 14px);
+  left: 50%; /* <-- CENTRADO MAESTRO */
   background: rgba(16, 25, 50, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -842,7 +841,8 @@ html, body, #root {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(14px) scale(0.94);
+  transform: translateX(-50%) translateY(14px) scale(0.94); 
+  transform-origin: bottom center; 
   transition: 
     opacity var(--transition-fast),
     visibility var(--transition-fast),
@@ -855,18 +855,15 @@ html, body, #root {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateX(-70%) translateY(0) scale(1);
+  transform: translateX(-50%) translateY(0) scale(1);
 }
 
 .fab-dropdown-menu {
-  left: 120%;
-  transform: translateX(-50%) translateY(14px) scale(0.94);
   padding: 6px;
   min-width: 150px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  transform-origin: bottom center;
 }
 
 .dropdown-item {
@@ -1251,11 +1248,8 @@ html, body, #root {
    12. CONFIGURACIÓN VISUAL DEL HUD (PANEL FLOTANTE FAB)
    ========================================================================== */
 .fab-config-menu {
-  left: 50%;
-  transform: translateX(-50%) translateY(14px) scale(0.94);
   padding: 20px;
   width: min(272px, calc(100vw - 32px));
-  transform-origin: bottom center;
 }
 
 .fab-config-title {
@@ -2105,10 +2099,27 @@ textarea:focus-visible,
 
 .fab-dropdown-menu,
 .fab-config-menu {
-  border-color: rgba(105, 231, 255, 0.34);
-  border-radius: 16px;
-  background: rgba(12, 18, 34, 0.94);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  position: fixed;
+  bottom: calc(70px + var(--safe-bottom));
+  left: 50%;
+  background: rgba(16, 25, 50, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: 
+    0 24px 54px rgba(0, 0, 0, 0.82),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(14px) scale(0.94);
+  transform-origin: bottom center;
+  transition: 
+    opacity var(--transition-fast),
+    visibility var(--transition-fast),
+    transform var(--transition-bouncy);
+  z-index: 60;
 }
 
 .dropdown-item {
