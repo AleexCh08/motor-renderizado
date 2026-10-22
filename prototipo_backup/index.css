@@ -855,7 +855,7 @@ html, body, #root {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateY(0) scale(1);
+  transform: translateX(-70%) translateY(0) scale(1);
 }
 
 .fab-dropdown-menu {
@@ -1250,10 +1250,11 @@ html, body, #root {
    12. CONFIGURACIÓN VISUAL DEL HUD (PANEL FLOTANTE FAB)
    ========================================================================== */
 .fab-config-menu {
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(14px) scale(0.94);
   padding: 20px;
   width: min(272px, calc(100vw - 32px));
-  transform-origin: bottom right;
+  transform-origin: bottom center;
 }
 
 .fab-config-title {
