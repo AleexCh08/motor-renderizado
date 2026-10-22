@@ -859,13 +859,14 @@ html, body, #root {
 }
 
 .fab-dropdown-menu {
-  left: 0;
+  left: 120%;
+  transform: translateX(-50%) translateY(14px) scale(0.94);
   padding: 6px;
   min-width: 150px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  transform-origin: bottom left;
+  transform-origin: bottom center;
 }
 
 .dropdown-item {
