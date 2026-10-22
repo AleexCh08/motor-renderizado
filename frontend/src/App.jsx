@@ -16,6 +16,7 @@ import {
 } from './utils/hudBuilder';
 import NotFound from './components/NotFound';
 import HelpModal from './components/HelpModal';
+import RefineMaskModal from './components/RefineMaskModal';
 
 // Generador de especificación vacía para iniciar limpio y para el reseteo
 const getEmptySpec = () => ({
@@ -81,6 +82,9 @@ export default function App() {
 
   // Estado del Modal de Ayuda
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  // Estado del Quirófano de Edición
+  const [isRefineModalOpen, setIsRefineModalOpen] = useState(false);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -458,6 +462,7 @@ export default function App() {
         hudConfig={hudConfig}
         onUpdateHudConfig={handleUpdateHudConfig}
         hasSpecs={specs.filter((s) => s.clave.trim() && s.valor.trim()).length > 0}
+        onOpenRefine={() => setIsRefineModalOpen(true)}
       />
 
       {/* MODAL PERSONALIZADO DE REINICIO */}
@@ -537,6 +542,49 @@ export default function App() {
       {isHelpOpen && (
         <HelpModal onClose={() => setIsHelpOpen(false)} />
       )}
-    </div>
+      
+      {/* QUIRÓFANO DE EDICIÓN */}
+      {isRefineModalOpen && (
+        <RefineMaskModal
+          processedUrl={productFabricObjRef.current?.getSrc()}
+          onClose={() => setIsRefineModalOpen(false)}
+          onApply={(newImageUrl) => {
+            fabric.Image.fromURL(newImageUrl, (newImg) => {
+              const canvas = canvasRef.current;
+              const oldImg = productFabricObjRef.current;
+
+              if (canvas && oldImg) {
+                newImg.set({
+                  left: oldImg.left,
+                  top: oldImg.top,
+                  scaleX: oldImg.scaleX,
+                  scaleY: oldImg.scaleY,
+                  angle: oldImg.angle,
+                  borderColor: oldImg.borderColor,
+                  cornerColor: oldImg.cornerColor,
+                  cornerStrokeColor: oldImg.cornerStrokeColor,
+                  transparentCorners: oldImg.transparentCorners,
+                  cornerSize: oldImg.cornerSize,
+                  touchCornerSize: oldImg.touchCornerSize,
+                  cornerStyle: oldImg.cornerStyle,
+                  padding: oldImg.padding,
+                  rotatingPointOffset: oldImg.rotatingPointOffset,
+                  borderDashArray: oldImg.borderDashArray,
+                  shadow: oldImg.shadow,
+                });
+
+                canvas.remove(oldImg);
+                canvas.add(newImg);
+                canvas.setActiveObject(newImg);
+                productFabricObjRef.current = newImg;
+                canvas.renderAll();
+              }
+            });
+            setIsRefineModalOpen(false);
+            showToast('Recorte pulido aplicado', 'success');
+          }}
+        />
+      )}
+    </div>   
   );
 }

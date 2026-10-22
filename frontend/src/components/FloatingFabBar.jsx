@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, Focus, LayoutGrid, Crop, Palette, Sliders } from 'lucide-react';
+import { Download, Focus, LayoutGrid, Crop, Palette, Sliders, Eraser } from 'lucide-react';
 import { ASPECT_RATIOS } from '../utils/hudBuilder';
 
 export default function FloatingFabBar({
@@ -16,6 +16,7 @@ export default function FloatingFabBar({
   hudConfig,
   onUpdateHudConfig,
   hasSpecs,
+  onOpenRefine,
 }) {
   const [ratioMenuOpen, setRatioMenuOpen] = useState(false);
   const [configMenuOpen, setConfigMenuOpen] = useState(false);
@@ -83,6 +84,16 @@ export default function FloatingFabBar({
             title="Centrar producto"
           >
             <Focus size={18} />
+          </button>
+
+          <button
+            type="button"
+            className="neu-btn compact-btn"
+            onClick={onOpenRefine}
+            disabled={disabled}
+            title="Pulir recorte (Borrador)"
+          >
+            <Eraser size={18} />
           </button>
 
           {hasSpecs && (
