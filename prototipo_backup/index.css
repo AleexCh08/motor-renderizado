@@ -2762,3 +2762,239 @@ body {
     bottom: calc(16px + var(--safe-bottom));
   }
 }
+
+/* ==========================================================================
+   19. QUIRÓFANO DE EDICIÓN (REFINE MASK MODAL)
+   Estilo frosted glass / midnight cathedral — compatible con la paleta actual
+   ========================================================================== */
+
+.refine-overlay {
+  z-index: 11000;
+  padding: 16px;
+  background: rgba(5, 11, 26, 0.88);
+  backdrop-filter: blur(18px) saturate(115%);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+}
+
+.refine-modal {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  background:
+    radial-gradient(
+      ellipse 80% 35% at 50% 0%,
+      rgba(221, 247, 255, 0.07),
+      transparent 70%
+    ),
+    rgba(16, 25, 50, 0.94);
+  border: 0;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 1px rgba(216, 236, 248, 0.20),
+    inset 0 24px 48px rgba(168, 216, 245, 0.06),
+    0 16px 32px rgba(0, 0, 0, 0.38),
+    0 0 34px rgba(63, 73, 89, 0.24);
+}
+
+.refine-modal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(186, 215, 247, 0.10);
+}
+
+.refine-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 68px;
+  padding: 16px 24px;
+  background: rgba(7, 12, 25, 0.58);
+  border-bottom: 0;
+  box-shadow:
+    inset 0 -1px 0 rgba(186, 215, 247, 0.12),
+    inset 0 1px 1px rgba(216, 236, 248, 0.12);
+}
+
+.refine-header::after {
+  content: '';
+  position: absolute;
+  right: 24px;
+  bottom: 0;
+  left: 24px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(186, 215, 247, 0.16),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.refine-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.refine-workspace {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  background-color: var(--bg-body);
+  background-image:
+    linear-gradient(
+      45deg,
+      rgba(221, 247, 255, 0.035) 25%,
+      transparent 25%
+    ),
+    linear-gradient(
+      -45deg,
+      rgba(221, 247, 255, 0.035) 25%,
+      transparent 25%
+    ),
+    linear-gradient(
+      45deg,
+      transparent 75%,
+      rgba(221, 247, 255, 0.035) 75%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 75%,
+      rgba(221, 247, 255, 0.035) 75%
+    ),
+    linear-gradient(rgba(186, 215, 247, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(186, 215, 247, 0.035) 1px, transparent 1px);
+  background-size:
+    24px 24px,
+    24px 24px,
+    24px 24px,
+    24px 24px,
+    80px 80px,
+    80px 80px;
+  background-position:
+    0 0,
+    0 12px,
+    12px -12px,
+    -12px 0,
+    0 0,
+    0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow:
+    inset 0 24px 48px rgba(0, 0, 0, 0.12),
+    inset 0 -24px 48px rgba(0, 0, 0, 0.16);
+}
+
+.refine-workspace::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 25%,
+    rgba(5, 11, 26, 0.22) 100%
+  );
+}
+
+.refine-toolbar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 76px;
+  padding: 16px 24px;
+  background: rgba(7, 12, 25, 0.64);
+  border-top: 0;
+  gap: 16px;
+  box-shadow:
+    inset 0 1px 1px rgba(216, 236, 248, 0.16),
+    inset 0 -1px 0 rgba(186, 215, 247, 0.08);
+}
+
+.refine-tools-group,
+.refine-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.refine-tools-group .neu-btn,
+.refine-actions-group .neu-btn {
+  border-radius: var(--radius-pill);
+}
+
+.refine-tools-group .neu-btn.compact-btn,
+.refine-actions-group .neu-btn.compact-btn {
+  border-radius: 9999px;
+}
+
+.refine-slider {
+  width: 120px;
+}
+
+@media (max-width: 620px) {
+  .refine-overlay {
+    padding: 0;
+  }
+
+  .refine-modal {
+    border-radius: 0;
+    border: 0;
+  }
+
+  .refine-header {
+    min-height: 60px;
+    padding: 14px 16px;
+  }
+
+  .refine-header::after {
+    right: 16px;
+    left: 16px;
+  }
+
+  .refine-title {
+    font-size: 0.86rem;
+    letter-spacing: 0.08em;
+  }
+
+  .refine-toolbar {
+    flex-direction: column;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .refine-tools-group,
+  .refine-actions-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .refine-tools-group .neu-btn,
+  .refine-actions-group .neu-btn {
+    min-height: 44px;
+  }
+
+  .refine-slider {
+    flex: 1;
+    width: auto;
+    min-width: 100px;
+  }
+}
+

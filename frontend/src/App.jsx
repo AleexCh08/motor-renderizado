@@ -148,9 +148,24 @@ export default function App() {
       if (!canvas) return;
 
       try {
-        await document.fonts.load('16px "Harman Retro"');
+        const fontToLoad = currentHudConfig ? currentHudConfig.fontFamily : 'Plus Jakarta Sans';
+        
+        if (fontToLoad !== 'Harman Retro') {
+          const fontId = `font-${fontToLoad.replace(/\s+/g, '-').toLowerCase()}`;
+          if (!document.getElementById(fontId)) {
+            const link = document.createElement('link');
+            link.id = fontId;
+            link.rel = 'stylesheet';
+            link.href = `https://fonts.googleapis.com/css2?family=${fontToLoad.replace(/\s+/g, '+')}:wght@400;600;700;800&display=swap`;
+            document.head.appendChild(link);
+          }
+        }
+
+        await document.fonts.load(`16px "${fontToLoad}"`);
+        await document.fonts.ready;
+        await new Promise(resolve => setTimeout(resolve, 80));
       } catch {
-        // Continúa con fuente de respaldo si falla
+        // Continúa silenciosamente si la fuente falla
       }
 
       const dims = getTargetDimensions(ratioId, bgObj);
@@ -296,14 +311,28 @@ export default function App() {
     
     if (canvasRef.current) {
       if (field === 'fontFamily') {
+        if (value !== 'Harman Retro') {
+          const fontId = `font-${value.replace(/\s+/g, '-').toLowerCase()}`;
+          if (!document.getElementById(fontId)) {
+            const link = document.createElement('link');
+            link.id = fontId;
+            link.rel = 'stylesheet';
+            link.href = `https://fonts.googleapis.com/css2?family=${value.replace(/\s+/g, '+')}:wght@400;600;700;800&display=swap`;
+            document.head.appendChild(link);
+          }
+        }
+
         try {
           await document.fonts.load(`16px "${value}"`);
+          await document.fonts.ready;
+          await new Promise(resolve => setTimeout(resolve, 80));
         } catch (error) {
           console.warn(`La fuente ${value} tardó en responder.`);
         }
       }
       
       renderHudSpecifications(canvasRef.current, specs, productFabricObjRef.current, newConfig);
+      canvasRef.current.renderAll();
     }
   };
 
